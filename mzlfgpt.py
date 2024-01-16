@@ -80,7 +80,7 @@ class MZLFGPTMod(loader.Module):
             month = datetime.today().month
             year = datetime.today().year
 
-            json_result = await openai.ChatCompletion.acreate(
+            json_result = await openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
