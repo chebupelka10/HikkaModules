@@ -24,9 +24,9 @@ class BVideoMod(loader.Module):
         chat = message.chat_id
         if chat not in self.blocked:
             self.blocked[chat] = []
-            await message.edit("<b><emoji document_id=5312526098750252863>❌</emoji> Видео заблокированы в этом чате.</b>")
+            await message.edit("<b><emoji document_id=5312526098750252863>❌</emoji> Видео заблокированы в этом чате</b>")
         else:
-            await message.edit("<b><emoji document_id=5314591660192046611>❌</emoji> Видео уже заблокированы в этом чате.</b>")
+            await message.edit("<b><emoji document_id=5314591660192046611>❌</emoji> Видео уже заблокированы в этом чате</b>")
 
     async def vidstatuscmd(self, message):
         """Показывает в каких чатах заблокированны видео"""
@@ -35,16 +35,16 @@ class BVideoMod(loader.Module):
             ids = ", ".join(str(id) for id in self.blocked[chat])
             await message.edit(f"<b><emoji document_id=5429452773747860261>❌</emoji> Видео заблокированы для этих пользователей: {ids}</b>")
         else:
-            await message.edit("<b><emoji document_id=5308041633202182757>✔️</emoji> Видео не заблокированы для никого.</b>")
+            await message.edit("<b><emoji document_id=5308041633202182757>✔️</emoji> Видео не заблокированы для никого</b>")
 
     async def ubvideocmd(self, message):
         """Разблокирует видео в чатах"""
         chat = message.chat_id
         if chat in self.blocked:
             self.blocked.pop(chat)
-            await message.edit("<b><emoji document_id=5314250708508220914>✅</emoji> Видео разблокированы в этом чате.</b>")
+            await message.edit("<b><emoji document_id=5314250708508220914>✅</emoji> Видео разблокированы в этом чате</b>")
         else:
-            await message.edit("<b><emoji document_id=5321366563079595431>👍</emoji> Видео не были заблокированы в этом чате.</b>")
+            await message.edit("<b><emoji document_id=5321366563079595431>👍</emoji> Видео не были заблокированы в этом чате</b>")
 
     async def watcher(self, message):
         chat = message.chat_id
