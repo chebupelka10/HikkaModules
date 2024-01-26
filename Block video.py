@@ -5,7 +5,7 @@ from telethon import events
 from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto
 
 class BVideoMod(loader.Module):
-    """Blocks videos from other users in a chat"""
+    """Блокирует видео в чатах by @y9chebupelka"""
     strings = {"name": "Block video"}
 
     def __init__(self):
@@ -20,7 +20,7 @@ class BVideoMod(loader.Module):
         self.me = await client.get_me()
 
     async def bvideocmd(self, message):
-        """Блокирует видео в чатах by @y9chebupelka"""
+        """Блокирует видео в чатах"""
         chat = message.chat_id
         if chat not in self.blocked:
             self.blocked[chat] = []
