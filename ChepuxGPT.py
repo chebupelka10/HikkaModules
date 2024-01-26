@@ -44,6 +44,6 @@ class ChepuxGPTMod(loader.Module):
                 messages=prompt
             )
             answer = response.choices[0].message.content
-            await utils.answer(message, f"<b><<emoji document_id=5314378951936711868>👍</emoji> Вопрос:</b> {question}\n<b><emoji document_id=5321366563079595431>👍</emoji> Ответ:</b> {answer}")
+            await utils.answer(message, f"<b><emoji document_id=5314378951936711868>👍</emoji> Вопрос:</b> {question}\n<b><emoji document_id=5321366563079595431>👍</emoji> Ответ:</b> {answer}")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
