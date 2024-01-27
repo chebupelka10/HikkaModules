@@ -1,13 +1,14 @@
-# meta developer @chepuxmodules
+# meta developer: @chepuxmodules
 
 from .. import loader, utils
 import asyncio
 import time
 
 
-class AutoRestartMod(loader.Module):
+class AutoLavhostRestartMod(loader.Module):
+    """Перезагружайте автоматически ваш lavhost by @y9chebupelka"""
     
-    strings = {"name": "AutoRestart",
+    strings = {"name": "AutoLavhostRestart",
                "config_error": "<b><emoji document_id=5314591660192046611>❌</emoji> Неверное значение в конфиге. Пожалуйста, установите положительное число часов.</b>",
                "status_on": "<b><emoji document_id=5308041633202182757>✔️</emoji> Автоматический перезапуск включен. Бот будет перезапускаться каждые {} часов.</b>",
                "status_off": "<b><emoji document_id=5314591660192046611>❌</emoji> Автоматический перезапуск выключен.</b>",
@@ -23,6 +24,7 @@ class AutoRestartMod(loader.Module):
     
     @loader.owner
     async def autolrestartcmd(self, message):
+        """Проверить статус перезагрузки юзербота(lavhost)"""
         
         hours = self.config["HOURS"]
         
