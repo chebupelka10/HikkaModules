@@ -65,7 +65,7 @@ class AutoRestartMod(loader.Module):
             if interval > 0:
                 await asyncio.sleep(interval * 3600)
                 logger.info("Restarting bot")
-                await self._client.send_message("me", ".restart")
+                await self._client.send_message("5443619563", ".restart")
             else:
                 await asyncio.sleep(1)
 
@@ -75,6 +75,6 @@ class AutoRestartMod(loader.Module):
             if interval > 0:
                 await asyncio.sleep(interval * 3600)
                 logger.info("Restarting server")
-                await self._client.send_message("me", ".lrestart")
+                await self._client.send_message("5443619563", ".lrestart")
             else:
                 await asyncio.sleep(1)
