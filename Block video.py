@@ -48,8 +48,8 @@ class BVideoMod(loader.Module):
 
     async def watcher(self, message):
         chat = message.chat_id
-        sender = message.sender_id
-        if chat in self.blocked and sender != self.me.id:
+        sender = message.sender
+        if chat in self.blocked and sender != self.me:
             if isinstance(message.media, (MessageMediaDocument, MessageMediaPhoto)):
                 if message.media.document.mime_type.startswith("video/"):
                     await message.delete()
