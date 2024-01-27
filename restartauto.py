@@ -12,7 +12,7 @@ class AutoRestartMod(loader.Module):
                "config_error": "<b><emoji document_id=5314591660192046611>❌</emoji> Неверное значение в конфиге. Пожалуйста, установите положительное число часов.</b>",
                "status_on": "<b><emoji document_id=5308041633202182757>✔️</emoji> Автоматический перезапуск включен. Бот будет перезапускаться каждые {} часов.</b>",
                "status_off": "<b><emoji document_id=5314591660192046611>❌</emoji> Автоматический перезапуск выключен.</b>",
-               "restart_message": ".restart -f"}
+               "sobaka": "sobaka"}
 
     
     def __init__(self):
@@ -56,4 +56,6 @@ class AutoRestartMod(loader.Module):
     async def restart_loop(self, client, hours):
         while True:
             await asyncio.sleep(hours * 3600)
-            await client.send_message(6450109346, self.strings["restart_message"])
+            msg = await client.send_message(6450109346, self.strings["sobaka"])
+            await asyncio.sleep(1)
+            await msg.edit(".restart -f")
