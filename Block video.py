@@ -33,9 +33,9 @@ class BVideoMod(loader.Module):
         chat = message.chat_id
         if chat in self.blocked and self.blocked[chat]:
             ids = ", ".join(str(id) for id in self.blocked[chat])
-            await message.edit(f"<b><emoji document_id=5429452773747860261>❌</emoji> Видео заблокированы для этих пользователей в этом чате: {ids}</b>")
+            await message.edit(f"<b><emoji document_id=5429452773747860261>❌</emoji> Видео заблокированы в этом чате</b>")
         else:
-            await message.edit("<b><emoji document_id=5308041633202182757>✔️</emoji> Видео не заблокированы для никого</b>")
+            await message.edit("<b><emoji document_id=5308041633202182757>✔️</emoji> Видео тут не заблокированы</b>")
 
     async def ubvideocmd(self, message):
         """Разблокирует видео в чатах"""
