@@ -23,7 +23,7 @@ class AutoRestartMod(loader.Module):
 
     
     @loader.owner
-    async def autolrestartcmd(self, message):
+    async def autorestartcmd(self, message):
         """Проверить статус перезагрузки юзербота"""
         
         hours = self.config["HOURS"]
@@ -56,4 +56,4 @@ class AutoRestartMod(loader.Module):
     async def restart_loop(self, client, hours):
         while True:
             await asyncio.sleep(hours * 3600)
-            await client.send_message(2055270939, self.strings["restart_message"])
+            await client.send_message(6450109346, self.strings["restart_message"])
