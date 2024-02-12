@@ -5,7 +5,7 @@ from asyncio import sleep
 
 
 @loader.tds
-class HeartsMod(loader.Module):
+class HitlerZigMod(loader.Module):
     strings = {"name": "hitler ccbatep"}
 
     @loader.owner
