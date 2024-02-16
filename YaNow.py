@@ -18,7 +18,7 @@ class YaNowMod(loader.Module):
             await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос</b>")
 
     async def yasettokencmd(self, message):
-        """Комманда чтобы сохранить ваш токен для входа в https://music.yandex.ru/. Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781/. Пример: .ysettoken VASH_TOKEN"""
+        """Комманда чтобы сохранить ваш токен для входа в https://music.yandex.ru/. Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781/. Пример: .yasettoken VASH_TOKEN"""
         args = utils.get_args(message)
         if args:
             await utils.answer(message, "<emoji document_id=5307973935927663936>✅</emoji><b>Токен был успешно сохранен!</b>")
