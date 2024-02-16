@@ -1,5 +1,4 @@
-from hikka.modules import loader
-from hikka.utils import utils
+from .. import loader, utils
 
 @loader.tds
 class YaNowMod(loader.Module):
