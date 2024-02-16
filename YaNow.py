@@ -7,7 +7,7 @@ class YaNowMod(loader.Module):
     """Модуль который показывает что вы слушаете сейчас на https://music.yandex.ru/ by @y9chepux"""
     strings = {"name": "YaNow"}
 
-    async def ynowcmd(self, message):
+    async def yanowcmd(self, message):
         """Показывает что вы слушаете на https://music.yandex.ru/"""
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том что вы слушаете на https://music.yandex.ru/</b>")
         results = await message.client.inline_query("@YaNowBot", "")
@@ -17,7 +17,7 @@ class YaNowMod(loader.Module):
         else:
             await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос</b>")
 
-    async def ysettokencmd(self, message):
+    async def yasettokencmd(self, message):
         """Комманда чтобы сохранить ваш токен для входа в https://music.yandex.ru/. Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781/. Пример: .ysettoken VASH_TOKEN"""
         args = utils.get_args(message)
         if args:
