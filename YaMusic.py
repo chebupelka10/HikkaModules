@@ -31,7 +31,7 @@ class YaMusicMod(loader.Module):
         """Ищет треки на https://music.yandex.ru/"""
         args = utils.get_args(message)
         if args:
-            await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Ищу трек на https://music.yandex.ru/</b>")
+            await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b> Ищу трек на https://music.yandex.ru/</b>")
             results = await message.client.inline_query("@YaNowBot", " ".join(args))
             if results:
                 await results[0].click(message.to_id, hide_via=True)
