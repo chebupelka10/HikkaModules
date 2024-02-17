@@ -28,7 +28,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотри help yanow)</b>")    
     
     async def yasearchcmd(self, message):
-        """Ищет треки на https://music.yandex.ru/"""
+        """Ищет треки по запросу на https://music.yandex.ru/"""
         args = utils.get_args(message)
         if args:
             await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b> Ищу трек на https://music.yandex.ru/</b>")
