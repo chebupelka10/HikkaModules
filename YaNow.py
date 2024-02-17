@@ -15,7 +15,7 @@ class YaNowMod(loader.Module):
             await results[0].click(message.to_id, hide_via=True)
             await message.delete()
         else:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос</b>")
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотри help yanow)</b>")
 
     async def yanowtrackcmd(self, message):
         """Отправляет трек который вы слушаете на https://music.yandex.ru/"""
@@ -25,7 +25,7 @@ class YaNowMod(loader.Module):
             await results[1].click(message.to_id, hide_via=True)
             await message.delete()
         else:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос</b>")    
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотри help yanow)</b>")    
     
     async def yasettokencmd(self, message):
         """Комманда чтобы сохранить ваш токен для входа в https://music.yandex.ru/. Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781/. Пример: .yasettoken VASH_TOKEN"""
