@@ -4,19 +4,22 @@ from .. import loader, utils
 
 @loader.tds
 class YaMusicMod(loader.Module):
-    """Модуль который показывает что вы слушаете сейчас и ищет треки на https://music.yandex.ru/ by @y9chepux"""
-    strings = {"name": "YaMusic"}
+    """Модуль который показывает что вы слушаете сейчас на https://music.yandex.ru/ by @y9chepux"""
+    strings = {"name": "YaNow"}
 
     async def yanowcmd(self, message):
         """Показывает что вы слушаете на https://music.yandex.ru/"""
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том что вы слушаете на https://music.yandex.ru/</b>")
         results = await message.client.inline_query("@YaNowBot", "")
-        if results:
-            await results[0].click(message.to_id, hide_via=True)
-            await message.delete()
-        else:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотри help yanow)</b>")
-
+        try:
+            if results:
+                await results[0].click(message.to_id, hide_via=True)
+                await message.delete()
+            else:
+                await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотри help yamusic)</b>")
+        except:
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотри help yamusic)</b>")
+    
     async def yanowtrackcmd(self, message):
         """Отправляет трек который вы слушаете на https://music.yandex.ru/. Чтобы это работало надо боту @YaNowBot отправить /settings и указать в поле стандартный ответ (нет)"""
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том что вы слушаете на https://music.yandex.ru/</b>")
@@ -25,13 +28,13 @@ class YaMusicMod(loader.Module):
             await results[1].click(message.to_id, hide_via=True)
             await message.delete()
         else:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотри help yanow)</b>")    
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотри help yamusic)</b>")    
     
     async def yasearchcmd(self, message):
-        """Ищет треки по запросу на https://music.yandex.ru/"""
+        """Ищет треки на https://music.yandex.ru/"""
         args = utils.get_args(message)
         if args:
-            await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b> Ищу трек на https://music.yandex.ru/</b>")
+            await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Ищу трек на https://music.yandex.ru/</b>")
             results = await message.client.inline_query("@YaNowBot", " ".join(args))
             if results:
                 await results[0].click(message.to_id, hide_via=True)
