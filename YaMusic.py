@@ -4,7 +4,7 @@ from .. import loader, utils
 
 @loader.tds
 class YaMusicMod(loader.Module):
-    """Модуль который показывает что вы слушаете сейчас на https://music.yandex.ru/ by @y9chepux"""
+    """Модуль который показывает что вы слушаете сейчас и ищет треки на https://music.yandex.ru/ by @y9chepux"""
     strings = {"name": "YaMusic"}
 
     async def yanowcmd(self, message):
