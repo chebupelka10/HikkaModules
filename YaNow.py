@@ -34,4 +34,4 @@ class YaNowMod(loader.Module):
             await utils.answer(message, "<emoji document_id=5307973935927663936>✅</emoji><b>Токен был успешно сохранен! Если после этого комманды не работают проверьте чат @YaNowBot</b>")
             await message.client.send_message("@YaNowBot", "/token " + " ".join(args))
         else:
-            await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Вы забыли указать token(Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781)")
+            await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Вы забыли указать token(Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781)</b>")
