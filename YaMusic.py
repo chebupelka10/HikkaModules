@@ -14,9 +14,9 @@ class YaMusicMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
             else:
-                await utils.answer(message, f"<emoji document_id=5314591660192046611>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
 
     async def yanowtrackcmd(self, message):
         """Отправляет трек, который вы слушаете на https://music.yandex.ru/. Чтобы это работало, боту @YaNowBot нужно отправить /settings и указать в поле стандартный ответ (нет)"""
@@ -27,9 +27,9 @@ class YaMusicMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
             else:
-                await utils.answer(message, f"<emoji document_id=5314591660192046611>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
 
     async def yasearchcmd(self, message):
         """Ищет треки на https://music.yandex.ru/"""
@@ -42,11 +42,11 @@ class YaMusicMod(loader.Module):
                 await message.delete()
             except Exception as e:
                 if "The bot did not answer to the callback query in time" in str(e):
-                    await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотрите help yanow)</b>")
+                    await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, попробуйте позже повторить запрос или вы не указали токен (Посмотрите help yanow)</b>")
                 else:
-                    await utils.answer(message, f"<emoji document_id=5314591660192046611>❌</emoji><b>Произошла ошибка: {e}</b>")
+                    await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
         else:
-            await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Вы не указали название песни</b>")
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Вы не указали название песни</b>")
 
     async def yasettokencmd(self, message):
         """Команда чтобы сохранить ваш токен для входа в https://music.yandex.ru/. Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781/. Пример: .yasettoken VASH_TOKEN"""
@@ -55,4 +55,4 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, "<emoji document_id=5307973935927663936>✅</emoji><b>Токен был успешно сохранен! Если после этого команды не работают, проверьте чат @YaNowBot</b>")
             await message.client.send_message("@YaNowBot", "/token " + " ".join(args))
         else:
-            await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Вы забыли указать токен (Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781)</b>")
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Вы забыли указать токен (Инструкция как его получить: https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781)</b>")
