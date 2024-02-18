@@ -6,7 +6,7 @@ class YaMusicMod(loader.Module):
     strings = {"name": "YaMusic"}
 
     async def yanowcmd(self, message):
-        """Показывает что вы слушаете на https://music.yandex.ru/"""
+        """Показывает что вы слушаете на https://music.yandex.ru/ (Не работает для моей волны)"""
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том, что вы слушаете на https://music.yandex.ru/</b>")
         try:
             results = await message.client.inline_query("@YaNowBot", "")
@@ -14,12 +14,12 @@ class YaMusicMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне (Посмотрите help yamusic)</b>")
             else:
                 await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
 
     async def yanowtrackcmd(self, message):
-        """Отправляет трек, который вы слушаете на https://music.yandex.ru/. Чтобы это работало, боту @YaNowBot нужно отправить /settings и указать в поле стандартный ответ (нет)"""
+        """Отправляет трек, который вы слушаете на https://music.yandex.ru/ (Не работает для моей волны). Чтобы это работало, боту @YaNowBot нужно отправить /settings и указать в поле стандартный ответ (нет)"""
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том, что вы слушаете на https://music.yandex.ru/</b>")
         try:
             results = await message.client.inline_query("@YaNowBot", "")
@@ -27,7 +27,7 @@ class YaMusicMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен (Посмотрите help yamusic)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы слушаете трек в моей волне или вы не указали токен или вы не проделали что написанно в описании этой комманды (Посмотрите help yamusic)</b>")
             else:
                 await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
 
