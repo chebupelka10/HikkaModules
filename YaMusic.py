@@ -7,6 +7,7 @@ class YaMusicMod(loader.Module):
 
     async def yanowcmd(self, message):
         """Показывает что вы слушаете на https://music.yandex.ru/ (Не работает для моей волны)"""
+        utils.get_topic
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том, что вы слушаете на https://music.yandex.ru/</b>")
         try:
             results = await message.client.inline_query("@YaNowBot", "")
@@ -20,6 +21,7 @@ class YaMusicMod(loader.Module):
 
     async def yanowtrackcmd(self, message):
         """Отправляет трек, который вы слушаете на https://music.yandex.ru/ (Не работает для моей волны). Чтобы это работало, боту @YaNowBot нужно отправить /settings и указать в поле стандартный ответ (нет)"""
+        utils.get_topic
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том, что вы слушаете на https://music.yandex.ru/</b>")
         try:
             results = await message.client.inline_query("@YaNowBot", "")
@@ -33,6 +35,7 @@ class YaMusicMod(loader.Module):
 
     async def yasearchcmd(self, message):
         """Ищет треки по запросу на https://music.yandex.ru/"""
+        utils.get_topic
         args = utils.get_args(message)
         if args:
             await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Ищу трек на https://music.yandex.ru/</b>")
