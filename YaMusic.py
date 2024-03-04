@@ -23,7 +23,7 @@ class YaMusicMod(loader.Module):
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji><b>Собираю данные о том, что вы слушаете на https://music.yandex.ru/</b>")
         try:
             results = await message.client.inline_query("@YaNowBot", "")
-            await results[1].click(utils.get_topic(message), hide_via=True)
+            await results[1].click(message.to_id , hide_via=True)
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
