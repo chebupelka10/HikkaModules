@@ -10,7 +10,7 @@ class MusicDLMod(loader.Module):
     strings = {
         "name": "MusicDL",
         "args": "<emoji document_id=5327834057977896553>👎</emoji> <b>Вы не указали название песни</b>",
-        "loading": "<emoji document_id=5328273261333584797>💃</emoji>Ищу эту песню</b>",
+        "loading": "<b><emoji document_id=5328273261333584797>💃</emoji> Ищу эту песню</b>",
         "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
     }
 
