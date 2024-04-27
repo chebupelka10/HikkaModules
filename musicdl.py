@@ -9,9 +9,9 @@ class MusicDLMod(loader.Module):
 
     strings = {
         "name": "MusicDL",
-        "args": "🚫 Arguments not specified",
-        "loading": "🔍 Loading...",
-        "404": "🚫 Music {} not found",
+        "args": "<emoji document_id=5327834057977896553>👎</emoji> <b>Вы не указали название песни</b>",
+        "loading": "<emoji document_id=5328273261333584797>💃</emoji>Ищу эту песню</b>",
+        "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
     }
 
     async def client_ready(self, *_):
@@ -41,7 +41,7 @@ class MusicDLMod(loader.Module):
         await self._client.send_file(
             message.peer_id,
             result,
-            caption=f"🎧 {utils.ascii_face()}",
+            caption=f"<b><emoji document_id=5328014223266030170>🎧</emoji> {utils.ascii_face()}</b>",
             reply_to=message.id,
         )
         if message.out:
