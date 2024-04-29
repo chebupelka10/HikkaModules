@@ -195,54 +195,54 @@ class YaMusicMod(loader.Module):
     async def ynowcmd(self, message: Message):
         """Get now playing track"""
 
-    if not self.config["YandexMusicToken"]:
-        await utils.answer(message, self.strings["no_token"])
-        return
+        if not self.config["YandexMusicToken"]:
+            await utils.answer(message, self.strings["no_token"])
+            return
 
-    try:
-        client = ClientAsync(self.config["YandexMusicToken"])
-        await client.init()
-    except:
-        await utils.answer(message, self.strings["no_token"])
-        return
-    try:
-        queues = await client.queues_list()
-        last_queue = await client.queue(queues[0].id)
-    except:
-        await utils.answer(message, self.strings["my_wave"])
-        return
-    try:
-        last_track_id = last_queue.get_current_track()
-        last_track = await last_track_id.fetch_track_async()
-    except:
-        await utils.answer(message, self.strings["my_wave"])
-        return
+        try:
+            client = ClientAsync(self.config["YandexMusicToken"])
+            await client.init()
+        except:
+            await utils.answer(message, self.strings["no_token"])
+            return
+        try:
+            queues = await client.queues_list()
+            last_queue = await client.queue(queues[0].id)
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+        try:
+            last_track_id = last_queue.get_current_track()
+            last_track = await last_track_id.fetch_track_async()
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
 
-    info = await client.tracks_download_info(last_track.id, True)
-    link = info[0].direct_link
+        info = await client.tracks_download_info(last_track.id, True)
+        link = info[0].direct_link
 
-    artists = ", ".join(last_track.artists_name())
-    title = last_track.title
-    if last_track.version:
-        title += f" ({last_track.version})"
+        artists = ", ".join(last_track.artists_name())
+        title = last_track.title
+        if last_track.version:
+            title += f" ({last_track.version})"
 
-    duration_minutes = last_track.duration_ms // 1000 // 60
-    duration_seconds = last_track.duration_ms // 1000 % 60
+        duration_minutes = last_track.duration_ms // 1000 // 60
+        duration_seconds = last_track.duration_ms // 1000 % 60
 
-    caption = self.strings["playing"].format(
-        utils.escape_html(artists),
-        utils.escape_html(title),
-        f"{duration_minutes:02}:{duration_seconds:02}",
-    )
+        caption = self.strings["playing"].format(
+            utils.escape_html(artists),
+            utils.escape_html(title),
+            f"{duration_minutes:02}:{duration_seconds:02}",
+        )
 
-    lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
+        lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
 
-    await utils.answer(
-        message,
-        f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
-        parse_mode="html",
-        link_preview=False,
-    )
+        await utils.answer(
+            message,
+            f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
+            parse_mode="html",
+            link_preview=False,
+        )
 
     @loader.command()
     async def ylyrics(self, message: types.Message):
