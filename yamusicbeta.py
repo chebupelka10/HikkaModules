@@ -9,6 +9,8 @@ from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
 from yandex_music import ClientAsync
 
+from .. import loader, utils
+
 logger = logging.getLogger(__name__)
 logging.getLogger("yandex_music").propagate = False
 
