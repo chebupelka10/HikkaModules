@@ -113,7 +113,6 @@ class YaMusicMod(loader.Module):
                 validator=loader.validators.Integer(minimum=100),
             ),
         )
-        self._task = None
 
     async def on_dlmod(self):
         if not self.get("guide_send", False):
@@ -154,15 +153,14 @@ class YaMusicMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self.client.edit_message(
-                        *widget[:2],
+                    await self.client.send_message(
+                        widget[0],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
                             + (f" ({last_track.version})" if last_track.version else "")
                         ),
+                        reply_to=widget[1]
                     )
-                except MessageNotModifiedError:
-                    pass
                 except FloodWaitError:
                     pass
                 except Exception:
@@ -177,9 +175,11 @@ class YaMusicMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
+    async def on_unload(self):
+        self._task.cancel()
 
     @loader.command()
-    async def automsgcmd(self, message: types.Message):
+    async def automsgcmd(self, message: Message):
         """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
         state = not self.get("state", False)
         self.set("state", state)
@@ -191,7 +191,7 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
-    async def ynowcmd(self, message: types.Message):
+    async def ynowcmd(self, message: Message):
         """Get now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -244,7 +244,7 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
-    async def ylyrics(self, message: types.Message):
+    async def ylyrics(self, message: Message):
         """Get now playing track lyrics"""
 
         if not self.config["YandexMusicToken"]:
@@ -281,7 +281,7 @@ class YaMusicMod(loader.Module):
         await utils.answer(message, text)
 
     @loader.command()
-    async def ybio(self, message: types.Message):
+    async def ybio(self, message: Message):
         """Show now playing track in your bio"""
 
         if not self.config["YandexMusicToken"]:
@@ -306,7 +306,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["autobiod"])
             self.autobio.stop()
 
-    async def ylikecmd(self, message: types.Message):
+    async def ylikecmd(self, message: Message):
         """❤ Like now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -348,7 +348,7 @@ class YaMusicMod(loader.Module):
             await last_track.like_async()
             await utils.answer(message, self.strings["liked"])
 
-    async def ydislikecmd(self, message: types.Message):
+    async def ydislikecmd(self, message: Message):
         """💔 Dislike now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -424,7 +424,7 @@ class YaMusicMod(loader.Module):
             await sleep(e.seconds)
             return
 
-    async def watcher(self, message: types.Message):
+    async def watcher(self, message: Message):
         try:
             if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
                 return
