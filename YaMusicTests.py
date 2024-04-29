@@ -191,6 +191,18 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
+    async def automsgcmd(self, message: types.Message):
+        """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
+        state = not self.get("state", False)
+        self.set("state", state)
+        await utils.answer(
+            message,
+            self.strings("state").format(
+                "on" if state else "off", self.strings("tutorial") if state else ""
+            ),
+        )
+
+    @loader.command()
     async def ynowcmd(self, message: types.Message):
         """Get now playing track"""
 
@@ -241,12 +253,19 @@ class YaMusicMod(loader.Module):
             f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
             parse_mode="html",
             link_preview=False,
-            file=types.InputMediaUploadedDocument(
-                file=link,
-                performer=artists,
-                title=title
-            )
         )
+
+        # Sending audio file using send_file
+        audio = types.InputMediaUploadedDocument(
+            file=link,
+            attributes=[
+                types.DocumentAttributeAudio(
+                    performer=artists,
+                    title=title
+                )
+            ]
+        )
+        await self.client.send_file(message.to_id, file=audio)
 
     @loader.command()
     async def ylyrics(self, message: types.Message):
