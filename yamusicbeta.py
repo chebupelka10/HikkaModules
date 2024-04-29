@@ -43,6 +43,7 @@ class YmNowMod(loader.Module):
             loader.ConfigValue("AutoMessageTemplate", "🎧 {}", "Template for AutoMessage"),
             loader.ConfigValue("update_interval", 300, "Update interval"),
         )
+        self._task = None
 
     async def on_dlmod(self):
         if not self.get("guide_send", False):
@@ -99,7 +100,7 @@ class YmNowMod(loader.Module):
             await asyncio.sleep(int(self.config["update_interval"]))
 
     async def on_unload(self):
-        if hasattr(self, "_task") and self._task:
+        if self._task:
             self._task.cancel()
         else:
             logger.warning("_task attribute not found or is already cancelled")
