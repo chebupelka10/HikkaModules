@@ -431,4 +431,4 @@ class YmNowMod(loader.Module):
             if "not" in str(e):
                 await utils.answer(message, self.strings["not_liked"])
             else:
-                await utils.answer(message, str(e)))
+                await utils.answer(message, str(e))
