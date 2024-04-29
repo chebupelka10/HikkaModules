@@ -113,6 +113,7 @@ class YaMusicMod(loader.Module):
                 validator=loader.validators.Integer(minimum=100),
             ),
         )
+        self._task = None
 
     async def on_dlmod(self):
         if not self.get("guide_send", False):
@@ -153,7 +154,7 @@ class YaMusicMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self._client.edit_message(
+                    await self.client.edit_message(
                         *widget[:2],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
@@ -177,7 +178,8 @@ class YaMusicMod(loader.Module):
             await asyncio.sleep(int(self.config["update_interval"]))
 
     async def on_unload(self):
-        self._task.cancel()
+        if self._task:
+            self._task.cancel()
 
     @loader.command()
     async def automsgcmd(self, message: types.Message):
@@ -476,4 +478,3 @@ class YaMusicMod(loader.Module):
         )
         if message.out:
             await message.delete()
-
