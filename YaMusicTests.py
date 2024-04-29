@@ -241,7 +241,7 @@ class YaMusicMod(loader.Module):
             f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
             parse_mode="html",
             link_preview=False,
-            file=types.Audio(
+            file=types.MessageMedia(
                 file=link,
                 performer=artists,
                 title=title
