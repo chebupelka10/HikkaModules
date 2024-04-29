@@ -5,6 +5,7 @@ from asyncio import sleep
 import aiohttp
 from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
+from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
 from yandex_music import ClientAsync
 
