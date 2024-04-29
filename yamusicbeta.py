@@ -36,7 +36,7 @@ class YmNowMod(loader.Module):
         ),
         "state": "🙂 <b>Widgets are now {}</b>\n{}",
         "tutorial": (
-            "ℹ️ <b>To enable widget, send a message to a preffered chat with text"
+            "ℹ️ <b>To enable widget, send a message to a preferred chat with text"
             " </b><code>{YANDEXMUSIC}</code>"
         ),
         "no_results": (
@@ -64,7 +64,7 @@ class YmNowMod(loader.Module):
         ),
         "my_wave": (
             "<b><emoji document_id=5472377424228396503>🤭</emoji> You listening to track"
-            " in my wave, i can't recognize it.</b>"
+            " in my wave, I can't recognize it.</b>"
         ),
         "_cfg_yandexmusictoken": "Yandex.Music account token",
         "_cfg_autobiotemplate": "Template for AutoBio",
@@ -390,8 +390,11 @@ class YmNowMod(loader.Module):
         try:
             await client.tracks_like(last_track.id)
             await utils.answer(message, self.strings["liked"])
-        except:
-            await utils.answer(message, self.strings["already_liked"])
+        except Exception as e:
+            if "already" in str(e):
+                await utils.answer(message, self.strings["already_liked"])
+            else:
+                await utils.answer(message, str(e))
 
     @loader.command()
     async def ydislike(self, message: Message):
@@ -425,5 +428,8 @@ class YmNowMod(loader.Module):
         try:
             await client.tracks_dislike(last_track.id)
             await utils.answer(message, self.strings["disliked"])
-        except:
-            await utils.answer(message, self.strings["not_liked"])
+        except Exception as e:
+            if "not" in str(e):
+                await utils.answer(message, self.strings["not_liked"])
+            else:
+                await utils.answer(message, str(e)))
