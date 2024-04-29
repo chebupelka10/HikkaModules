@@ -9,11 +9,8 @@ from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
 from yandex_music import ClientAsync
 
-from .. import loader, utils
-
 logger = logging.getLogger(__name__)
 logging.getLogger("yandex_music").propagate = False
-
 
 @loader.tds
 class YmNowMod(loader.Module):
@@ -100,7 +97,8 @@ class YmNowMod(loader.Module):
             await asyncio.sleep(int(self.config["update_interval"]))
 
     async def on_unload(self):
-        self._task.cancel()
+        if hasattr(self, "_task") and self._task:
+            self._task.cancel()
 
     @loader.command()
     async def ynowcmd(self, message: Message):
@@ -122,12 +120,16 @@ class YmNowMod(loader.Module):
             title = last_track.title
             if last_track.version:
                 title += f" ({last_track.version})"
-            lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
+            else:
+                pass
+
             caption = self.strings["playing"].format(
                 utils.escape_html(artists),
                 utils.escape_html(title),
                 f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}",
             )
+            lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
+
             await self.inline.form(
                 message=message,
                 text=caption,
