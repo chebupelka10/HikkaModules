@@ -191,18 +191,6 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
-    async def automsgcmd(self, message: types.Message):
-        """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
-        state = not self.get("state", False)
-        self.set("state", state)
-        await utils.answer(
-            message,
-            self.strings("state").format(
-                "on" if state else "off", self.strings("tutorial") if state else ""
-            ),
-        )
-
-    @loader.command()
     async def ynowcmd(self, message: types.Message):
         """Get now playing track"""
 
@@ -237,13 +225,12 @@ class YaMusicMod(loader.Module):
         if last_track.version:
             title += f" ({last_track.version})"
 
-        duration_minutes = last_track.duration_ms // 1000 // 60
-        duration_seconds = last_track.duration_ms // 1000 % 60
+        duration = last_track.duration_ms // 1000
 
         caption = self.strings["playing"].format(
             utils.escape_html(artists),
             utils.escape_html(title),
-            f"{duration_minutes:02}:{duration_seconds:02}",
+            f"{duration // 60:02}:{duration % 60:02}",
         )
 
         lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
@@ -261,7 +248,8 @@ class YaMusicMod(loader.Module):
             attributes=[
                 types.DocumentAttributeAudio(
                     performer=artists,
-                    title=title
+                    title=title,
+                    duration=duration
                 )
             ]
         )
