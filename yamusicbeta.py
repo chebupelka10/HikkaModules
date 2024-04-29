@@ -178,9 +178,6 @@ class YaMusicMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
-    async def on_unload(self):
-        self._task.cancel()
-
     @loader.command()
     async def automsgcmd(self, message: Message):
         """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
