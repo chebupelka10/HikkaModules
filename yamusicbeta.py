@@ -21,7 +21,7 @@ class YmNowMod(loader.Module):
         "playing": "<b>Now playing:</b> <code>{}</code><b> - </b><code>{}</code>\n<b>{}</b>",
         "no_args": "<b>Provide arguments!</b>",
         "state": "<b>Widgets are now {}</b>\n{}",
-        "tutorial": "<b>To enable widget, send a message to a preffered chat with text</b> <code>{YANDEXMUSIC}</code>",
+        "tutorial": "<b>To enable widget, send a message to a preferred chat with text</b> <code>{YANDEXMUSIC}</code>",
         "no_results": "<b>No results found :(</b>",
         "autobioe": "<b>Autobio enabled</b>",
         "autobiod": "<b>Autobio disabled</b>",
@@ -30,7 +30,7 @@ class YmNowMod(loader.Module):
         "liked": "<b>Liked current playing track!</b>",
         "not_liked": "<b>Current playing track not liked!</b>",
         "disliked": "<b>Disliked current playing track!</b>",
-        "my_wave": "<b>You listening to track in my wave, i can't recognize it.</b>",
+        "my_wave": "<b>You listening to track in my wave, I can't recognize it.</b>",
         "no_lyrics": "<b>Track doesn't have lyrics.</b>",
         "guide": '<a href="https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781">Instructions for obtaining a Yandex.Music token</a>',
         "configuring": "<b>Widget is ready and will be updated soon</b>",
@@ -101,6 +101,8 @@ class YmNowMod(loader.Module):
     async def on_unload(self):
         if hasattr(self, "_task") and self._task:
             self._task.cancel()
+        else:
+            logger.warning("_task attribute not found or is already cancelled")
 
     @loader.command()
     async def ynowcmd(self, message: Message):
