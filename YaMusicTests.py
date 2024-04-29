@@ -245,6 +245,7 @@ class YaMusicMod(loader.Module):
         # Sending audio file using send_file
         audio = types.InputMediaUploadedDocument(
             file=link,
+            mime_type='audio/mpeg',
             attributes=[
                 types.DocumentAttributeAudio(
                     performer=artists,
