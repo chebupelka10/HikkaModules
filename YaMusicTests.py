@@ -244,7 +244,7 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
-    async def ylyrics(self, message: Message):
+    async def ylyrics(self, message: types.Message):
         """Get now playing track lyrics"""
 
         if not self.config["YandexMusicToken"]:
@@ -281,7 +281,7 @@ class YaMusicMod(loader.Module):
         await utils.answer(message, text)
 
     @loader.command()
-    async def ybio(self, message: Message):
+    async def ybio(self, message: types.Message):
         """Show now playing track in your bio"""
 
         if not self.config["YandexMusicToken"]:
@@ -306,7 +306,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["autobiod"])
             self.autobio.stop()
 
-    async def ylikecmd(self, message: Message):
+    async def ylikecmd(self, message: types.Message):
         """❤ Like now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -348,7 +348,7 @@ class YaMusicMod(loader.Module):
             await last_track.like_async()
             await utils.answer(message, self.strings["liked"])
 
-    async def ydislikecmd(self, message: Message):
+    async def ydislikecmd(self, message: types.Message):
         """💔 Dislike now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -424,7 +424,7 @@ class YaMusicMod(loader.Module):
             await sleep(e.seconds)
             return
 
-    async def watcher(self, message: Message):
+    async def watcher(self, message: types.Message):
         try:
             if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
                 return
