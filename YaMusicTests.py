@@ -193,7 +193,7 @@ class YaMusicMod(loader.Module):
 
     @loader.command()
     async def ynowcmd(self, message: Message):
-    """Get now playing track"""
+        """Get now playing track"""
 
     if not self.config["YandexMusicToken"]:
         await utils.answer(message, self.strings["no_token"])
