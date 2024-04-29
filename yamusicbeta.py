@@ -23,6 +23,9 @@ class YmNowMod(loader.Module):
 
     strings = {
         "name": "YmNow",
+      "args": "<emoji document_id=5327834057977896553>👎</emoji> <b>Вы не указали название песни</b>",
+        "loading": "<b><emoji document_id=5328273261333584797>💃</emoji> Ищу эту песню</b>",
+        "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
         "no_token": (
             "<b><emoji document_id=5843952899184398024>🚫</emoji> Specify a token in"
             " config!</b>"
@@ -36,7 +39,7 @@ class YmNowMod(loader.Module):
         ),
         "state": "🙂 <b>Widgets are now {}</b>\n{}",
         "tutorial": (
-            "ℹ️ <b>To enable widget, send a message to a preferred chat with text"
+            "ℹ️ <b>To enable widget, send a message to a preffered chat with text"
             " </b><code>{YANDEXMUSIC}</code>"
         ),
         "no_results": (
@@ -64,7 +67,7 @@ class YmNowMod(loader.Module):
         ),
         "my_wave": (
             "<b><emoji document_id=5472377424228396503>🤭</emoji> You listening to track"
-            " in my wave, I can't recognize it.</b>"
+            " in my wave, i can't recognize it.</b>"
         ),
         "_cfg_yandexmusictoken": "Yandex.Music account token",
         "_cfg_autobiotemplate": "Template for AutoBio",
@@ -210,7 +213,7 @@ class YmNowMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self.client.edit_message(
+                    await self._client.edit_message(
                         *widget[:2],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
@@ -249,80 +252,70 @@ class YmNowMod(loader.Module):
         )
 
     @loader.command()
-async def ynowcmd(self, message: Message):
-    """Get now playing track"""
+    async def ynowcmd(self, message: Message):
+        """Get now playing track"""
 
-    if not self.config["YandexMusicToken"]:
-        await utils.answer(message, self.strings["no_token"])
-        return
+        if not self.config["YandexMusicToken"]:
+            await utils.answer(message, self.strings["no_token"])
+            return
 
-    try:
-        client = ClientAsync(self.config["YandexMusicToken"])
-        await client.init()
-    except:
-        await utils.answer(message, self.strings["no_token"])
-        return
+        try:
+            client = ClientAsync(self.config["YandexMusicToken"])
+            await client.init()
+        except:
+            await utils.answer(message, self.strings["no_token"])
+            return
+        try:
+            queues = await client.queues_list()
+            last_queue = await client.queue(queues[0].id)
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+        try:
+            last_track_id = last_queue.get_current_track()
+            last_track = await last_track_id.fetch_track_async()
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
 
-    try:
-        queues = await client.queues_list()
-        last_queue = await client.queue(queues[0].id)
-    except:
-        await utils.answer(message, self.strings["my_wave"])
-        return
+        info = await client.tracks_download_info(last_track.id, True)
+        link = info[0].direct_link
 
-    try:
-        last_track_id = last_queue.get_current_track()
-        last_track = await last_track_id.fetch_track_async()
-    except:
-        await utils.answer(message, self.strings["my_wave"])
-        return
+        artists = ", ".join(last_track.artists_name())
+        title = last_track.title
+        if last_track.version:
+            title += f" ({last_track.version})"
+        else:
+            pass
 
-    info = await client.tracks_download_info(last_track.id, True)
-    link = info[0].direct_link
+        caption = self.strings["playing"].format(
+            utils.escape_html(artists),
+            utils.escape_html(title),
+            (
+                f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
+            ),
+        )
+        try:
+            lnk = last_track.id.split(":")[1]
+        except:
+            lnk = last_track.id
+        else:
+            pass
 
-    artists = ", ".join(last_track.artists_name())
-    title = last_track.title
-    if last_track.version:
-        title += f" ({last_track.version})"
-    else:
-        pass
-
-    caption = self.strings["playing"].format(
-        utils.escape_html(artists),
-        utils.escape_html(title),
-        (
-            f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
-        ),
-    )
-    try:
-        lnk = last_track.id.split(":")[1]
-    except:
-        lnk = last_track.id
-    else:
-        pass
-
-    await self.inline.form(
-        message=message,
-        text=caption,
-        reply_markup={
-            "text": "song.link",
-            "url": f"https://song.link/ya/{lnk}",
-        },
-        silent=True,
-        audio={
-            "url": link,
-            "title": utils.escape_html(title),
-            "performer": utils.escape_html(artists),
-        },
-    )
-
-    # Send the photo along with the previous description
-    await message.client.send_file(
-        message.to_id,
-        "https://telegra.ph/file/f95554e854bf9d471eeb1.jpg",  # URL of the photo
-        caption=caption,  # Previous description
-    )
-
+        await self.inline.form(
+            message=message,
+            text=caption,
+            reply_markup={
+                "text": "song.link",
+                "url": f"https://song.link/ya/{lnk}",
+            },
+            silent=True,
+            audio={
+                "url": link,
+                "title": utils.escape_html(title),
+                "performer": utils.escape_html(artists),
+            },
+        )
 
     @loader.command()
     async def ylyrics(self, message: Message):
@@ -355,88 +348,204 @@ async def ynowcmd(self, message: Message):
                 async with session.get(lyrics.download_url) as request:
                     lyric = await request.text()
 
-            if not lyric.strip():
-                await utils.answer(message, self.strings["no_lyrics"])
+            text = self.strings["lyrics"].format(utils.escape_html(lyric))
+        except:
+            text = self.strings["no_lyrics"]
+
+        await utils.answer(message, text)
+
+    @loader.command()
+    async def ybio(self, message: Message):
+        """Show now playing track in your bio"""
+
+        if not self.config["YandexMusicToken"]:
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        try:
+            client = ClientAsync(self.config["YandexMusicToken"])
+            await client.init()
+        except:
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        current = self.get("autobio", False)
+        new = not current
+        self.set("autobio", new)
+
+        if new:
+            await utils.answer(message, self.strings["autobioe"])
+            self.autobio.start()
+        else:
+            await utils.answer(message, self.strings["autobiod"])
+            self.autobio.stop()
+
+    async def ylikecmd(self, message: Message):
+        """❤ Like now playing track"""
+
+        if not self.config["YandexMusicToken"]:
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        try:
+            client = ClientAsync(self.config["YandexMusicToken"])
+            await client.init()
+        except:
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        try:
+            queues = await client.queues_list()
+            last_queue = await client.queue(queues[0].id)
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+
+        try:
+            last_track_id = last_queue.get_current_track()
+            last_track = await last_track_id.fetch_track_async()
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+
+        liked_tracks = await client.users_likes_tracks()
+        liked_tracks = await liked_tracks.fetch_tracks_async()
+
+        if isinstance(liked_tracks, list):
+            if last_track in liked_tracks:
+                await utils.answer(message, self.strings["already_liked"])
+                return
+            else:
+                await last_track.like_async()
+                await utils.answer(message, self.strings["liked"])
+        else:
+            await last_track.like_async()
+            await utils.answer(message, self.strings["liked"])
+
+    async def ydislikecmd(self, message: Message):
+        """💔 Dislike now playing track"""
+
+        if not self.config["YandexMusicToken"]:
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        try:
+            client = ClientAsync(self.config["YandexMusicToken"])
+            await client.init()
+        except:
+            logging.info("Указан неверный токен!")
+            await utils.answer(message, self.strings["no_token"])
+            return
+
+        try:
+            queues = await client.queues_list()
+            last_queue = await client.queue(queues[0].id)
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+
+        try:
+            last_track_id = last_queue.get_current_track()
+            last_track = await last_track_id.fetch_track_async()
+        except:
+            await utils.answer(message, self.strings["my_wave"])
+            return
+
+        liked_tracks = await client.users_likes_tracks()
+        liked_tracks = await liked_tracks.fetch_tracks_async()
+
+        if isinstance(liked_tracks, list):
+            if last_track in liked_tracks:
+                await last_track.dislike_async()
+                await utils.answer(message, self.strings["disliked"])
+
+            else:
+                await utils.answer(message, self.strings["not_liked"])
                 return
 
-            await utils.answer(
-                message, self.strings["lyrics"].format(utils.escape_html(lyric))
+        else:
+            await utils.answer(message, self.strings["not_liked"])
+            return
+
+    @loader.loop(interval=60)
+    async def autobio(self):
+        client = ClientAsync(self.config["YandexMusicToken"])
+
+        await client.init()
+        queues = await client.queues_list()
+        last_queue = await client.queue(queues[0].id)
+
+        try:
+            last_track_id = last_queue.get_current_track()
+            last_track = await last_track_id.fetch_track_async()
+        except:
+            return
+
+        artists = ", ".join(last_track.artists_name())
+        title = last_track.title
+
+        text = self.config["AutoBioTemplate"].format(
+            f"{artists} - {title}"
+            + (f" ({last_track.version})" if last_track.version else "")
+        )
+
+        try:
+            await self.client(
+                UpdateProfileRequest(about=text[: 140 if self._premium else 70])
             )
-        except:
-            await utils.answer(message, self.strings["no_lyrics"])
-
-    @loader.command()
-    async def ylike(self, message: Message):
-        """Like now playing track"""
-
-        if not self.config["YandexMusicToken"]:
-            await utils.answer(message, self.strings["no_token"])
+        except FloodWaitError as e:
+            logger.info(f"Sleeping {e.seconds}")
+            await sleep(e.seconds)
             return
 
+    async def watcher(self, message: Message):
         try:
-            client = ClientAsync(self.config["YandexMusicToken"])
-            await client.init()
-        except:
-            await utils.answer(message, self.strings["no_token"])
-            return
+            if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
+                return
 
-        try:
-            queues = await client.queues_list()
-            last_queue = await client.queue(queues[0].id)
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
+            chat_id = utils.get_chat_id(message)
+            message_id = message.id
 
-        try:
-            last_track_id = last_queue.get_current_track()
-            last_track = await last_track_id.fetch_track_async()
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
+            self.set(
+                "widgets",
+                self.get("widgets", []) + [(chat_id, message_id, message.text)],
+            )
 
-        try:
-            await client.tracks_like(last_track.id)
-            await utils.answer(message, self.strings["liked"])
+            await utils.answer(message, self.strings("configuring"))
+            await self._parse(do_not_loop=True)
         except Exception as e:
-            if "already" in str(e):
-                await utils.answer(message, self.strings["already_liked"])
-            else:
-                await utils.answer(message, str(e))
+            logger.exception("Can't send widget")
+            await utils.answer(message, self.strings("error").format(e))
 
-    @loader.command()
-    async def ydislike(self, message: Message):
-        """Dislike now playing track"""
+    async def client_ready(self, *_):
+        self.musicdl = await self.import_lib(
+            "https://libs.hikariatama.ru/musicdl.py",
+            suspend_on_error=True,
+        )
 
-        if not self.config["YandexMusicToken"]:
-            await utils.answer(message, self.strings["no_token"])
+    @loader.command(ru_doc="<название> - Скачать песню")
+    async def yasearch(self, message: types.Message):
+        """ - Download track"""
+        args = utils.get_args_raw(message)
+        if not args and message.is_reply:
+            reply = await message.get_reply_message()
+            args = reply.raw_text.replace(".mdl", "").strip()
+        elif not args:
+            await utils.answer(message, self.strings("args"))
             return
 
-        try:
-            client = ClientAsync(self.config["YandexMusicToken"])
-            await client.init()
-        except:
-            await utils.answer(message, self.strings["no_token"])
+        message = await utils.answer(message, self.strings("loading"))
+        result = await self.musicdl.dl(args, only_document=True)
+
+        if not result:
+            await utils.answer(message, self.strings("404").format(args))
             return
 
-        try:
-            queues = await client.queues_list()
-            last_queue = await client.queue(queues[0].id)
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
-
-        try:
-            last_track_id = last_queue.get_current_track()
-            last_track = await last_track_id.fetch_track_async()
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
-
-        try:
-            await client.tracks_dislike(last_track.id)
-            await utils.answer(message, self.strings["disliked"])
-        except Exception as e:
-            if "not" in str(e):
-                await utils.answer(message, self.strings["not_liked"])
-            else:
-                await utils.answer(message, str(e))
+        await self._client.send_file(
+            message.peer_id,
+            result,
+            caption=f"<b><emoji document_id=5328014223266030170>🎧</emoji> {utils.ascii_face()}</b>",
+            reply_to=message.id,
+        )
+        if message.out:
+            await message.delete()
