@@ -76,7 +76,7 @@ class YmNowMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self._client.edit_message(
+                    await self.client.edit_message(
                         *widget[:2],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
@@ -179,20 +179,17 @@ class YmNowMod(loader.Module):
         try:
             client = ClientAsync(self.config["YandexMusicToken"])
             await client.init()
+            current = self.get("autobio", False)
+            new = not current
+            self.set("autobio", new)
+            if new:
+                await utils.answer(message, self.strings["autobioe"])
+                self.autobio.start()
+            else:
+                await utils.answer(message, self.strings["autobiod"])
+                self.autobio.stop()
         except:
             await utils.answer(message, self.strings["no_token"])
-            return
-
-        current = self.get("autobio", False)
-        new = not current
-        self.set("autobio", new)
-
-        if new:
-            await utils.answer(message, self.strings["autobioe"])
-            self.autobio.start()
-        else:
-            await utils.answer(message, self.strings["autobiod"])
-            self.autobio.stop()
 
     async def ylikecmd(self, message: Message):
         """❤ Like now playing track"""
