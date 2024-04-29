@@ -17,79 +17,20 @@ logging.getLogger("yandex_music").propagate = False
 
 
 @loader.tds
-class YmNowMod(loader.Module):
+class YaMusicMod(loader.Module):
     """
     Module for yandex music. Based on SpotifyNow, YaNow and WakaTime. [BETA]
     """
 
     strings = {
-        "name": "YmNow",
-      "args": "<emoji document_id=5327834057977896553>👎</emoji> <b>Вы не указали название песни</b>",
-        "loading": "<b><emoji document_id=5328273261333584797>💃</emoji> Ищу эту песню</b>",
-        "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
-        "no_token": (
-            "<b><emoji document_id=5843952899184398024>🚫</emoji> Specify a token in"
-            " config!</b>"
-        ),
-        "playing": (
-            "<b><emoji document_id=5188705588925702510>🎶</emoji> Now playing:"
-            " </b><code>{}</code><b> - </b><code>{}</code>\n<b>🕐 {}</b>"
-        ),
-        "no_args": (
-            "<b><emoji document_id=5843952899184398024>🚫</emoji> Provide arguments!</b>"
-        ),
-        "state": "🙂 <b>Widgets are now {}</b>\n{}",
-        "tutorial": (
-            "ℹ️ <b>To enable widget, send a message to a preffered chat with text"
-            " </b><code>{YANDEXMUSIC}</code>"
-        ),
-        "no_results": (
-            "<b><emoji document_id=5285037058220372959>☹️</emoji> No results found"
-            " :(</b>"
-        ),
-        "autobioe": "<b>🔁 Autobio enabled</b>",
-        "autobiod": "<b>🔁 Autobio disabled</b>",
-        "lyrics": "<b>📜 Lyrics: \n{}</b>",
-        "already_liked": (
-            "<b><emoji document_id=5843952899184398024>🚫</emoji> Current playing track"
-            " is already liked!</b>"
-        ),
-        "liked": (
-            "<b><emoji document_id=5310109269113186974>❤️</emoji> Liked current playing"
-            " track!</b>"
-        ),
-        "not_liked": (
-            "<b><emoji document_id=5843952899184398024>🚫</emoji> Current playing track"
-            " not liked!</b>"
-        ),
-        "disliked": (
-            "<b><emoji document_id=5471954395719539651>💔</emoji> Disliked current"
-            " playing track!</b>"
-        ),
-        "my_wave": (
-            "<b><emoji document_id=5472377424228396503>🤭</emoji> You listening to track"
-            " in my wave, i can't recognize it.</b>"
-        ),
-        "_cfg_yandexmusictoken": "Yandex.Music account token",
-        "_cfg_autobiotemplate": "Template for AutoBio",
-        "_cfg_automesgtemplate": "Template for AutoMessage",
-        "_cfg_update_interval": "Update interval",
-        "no_lyrics": (
-            "<b><emoji document_id=5843952899184398024>🚫</emoji> Track doesn't have"
-            " lyrics.</b>"
-        ),
-        "guide": (
-            '<a href="https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781">Instructions'
-            " for obtaining a Yandex.Music token</a>"
-        ),
-        "configuring": "🙂 <b>Widget is ready and will be updated soon</b>",
-    }
-
-    strings_ru = {
+        "name": "YaMusic",
         "no_token": (
             "<b><emoji document_id=5843952899184398024>🚫</emoji> Укажи токен в"
             " конфиге!</b>"
         ),
+        "args": "<emoji document_id=5327834057977896553>👎</emoji> <b>Вы не указали название песни</b>",
+        "loading": "<b><emoji document_id=5328273261333584797>💃</emoji> Ищу эту песню</b>",
+        "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
         "playing": (
             "<b><emoji document_id=5188705588925702510>🎶</emoji> Сейчас играет:"
             " </b><code>{}</code><b> - </b><code>{}</code>\n<b>🕐 {}</b>"
