@@ -177,9 +177,6 @@ class YaMusicMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
-    async def on_unload(self):
-        if self._task:
-            self._task.cancel()
 
     @loader.command()
     async def automsgcmd(self, message: types.Message):
