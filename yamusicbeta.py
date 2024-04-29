@@ -249,72 +249,80 @@ class YmNowMod(loader.Module):
         )
 
     @loader.command()
-    async def ynowcmd(self, message: Message):
-        """Get now playing track"""
+async def ynowcmd(self, message: Message):
+    """Get now playing track"""
 
-        if not self.config["YandexMusicToken"]:
-            await utils.answer(message, self.strings["no_token"])
-            return
+    if not self.config["YandexMusicToken"]:
+        await utils.answer(message, self.strings["no_token"])
+        return
 
-        try:
-            client = ClientAsync(self.config["YandexMusicToken"])
-            await client.init()
-        except:
-            await utils.answer(message, self.strings["no_token"])
-            return
+    try:
+        client = ClientAsync(self.config["YandexMusicToken"])
+        await client.init()
+    except:
+        await utils.answer(message, self.strings["no_token"])
+        return
 
-        try:
-            queues = await client.queues_list()
-            last_queue = await client.queue(queues[0].id)
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
+    try:
+        queues = await client.queues_list()
+        last_queue = await client.queue(queues[0].id)
+    except:
+        await utils.answer(message, self.strings["my_wave"])
+        return
 
-        try:
-            last_track_id = last_queue.get_current_track()
-            last_track = await last_track_id.fetch_track_async()
-        except:
-            await utils.answer(message, self.strings["my_wave"])
-            return
+    try:
+        last_track_id = last_queue.get_current_track()
+        last_track = await last_track_id.fetch_track_async()
+    except:
+        await utils.answer(message, self.strings["my_wave"])
+        return
 
-        info = await client.tracks_download_info(last_track.id, True)
-        link = info[0].direct_link
+    info = await client.tracks_download_info(last_track.id, True)
+    link = info[0].direct_link
 
-        artists = ", ".join(last_track.artists_name())
-        title = last_track.title
-        if last_track.version:
-            title += f" ({last_track.version})"
-        else:
-            pass
+    artists = ", ".join(last_track.artists_name())
+    title = last_track.title
+    if last_track.version:
+        title += f" ({last_track.version})"
+    else:
+        pass
 
-        caption = self.strings["playing"].format(
-            utils.escape_html(artists),
-            utils.escape_html(title),
-            (
-                f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
-            ),
-        )
-        try:
-            lnk = last_track.id.split(":")[1]
-        except:
-            lnk = last_track.id
-        else:
-            pass
+    caption = self.strings["playing"].format(
+        utils.escape_html(artists),
+        utils.escape_html(title),
+        (
+            f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
+        ),
+    )
+    try:
+        lnk = last_track.id.split(":")[1]
+    except:
+        lnk = last_track.id
+    else:
+        pass
 
-        await self.inline.form(
-            message=message,
-            text=caption,
-            reply_markup={
-                "text": "song.link",
-                "url": f"https://song.link/ya/{lnk}",
-            },
-            silent=True,
-            audio={
-                "url": link,
-                "title": utils.escape_html(title),
-                "performer": utils.escape_html(artists),
-            },
-        )
+    await self.inline.form(
+        message=message,
+        text=caption,
+        reply_markup={
+            "text": "song.link",
+            "url": f"https://song.link/ya/{lnk}",
+        },
+        silent=True,
+        audio={
+            "url": link,
+            "title": utils.escape_html(title),
+            "performer": utils.escape_html(artists),
+        },
+    )
+
+    # Send the photo along with the previous description
+    await message.client.send_file(
+        message.to_id,
+        "https://telegra.ph/file/f95554e854bf9d471eeb1.jpg",  # URL of the photo
+        caption=caption,  # Previous description
+    )
+
 
     @loader.command()
     async def ylyrics(self, message: Message):
