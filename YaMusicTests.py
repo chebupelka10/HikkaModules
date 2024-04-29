@@ -179,7 +179,7 @@ class YaMusicMod(loader.Module):
         self._task.cancel()
 
     @loader.command()
-    async def automsgcmd(self, message: Message):
+    async def automsgcmd(self, message: types.Message):
         """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
         state = not self.get("state", False)
         self.set("state", state)
