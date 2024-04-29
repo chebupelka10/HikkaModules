@@ -3,10 +3,11 @@ import logging
 from asyncio import sleep
 
 import aiohttp
-from telethon import TelegramClient, types
+from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import FloodWaitError
 from telethon.tl.functions.account import UpdateProfileRequest
 from yandex_music import ClientAsync
+from telethon.tl import types
 
 from .. import loader, utils
 
