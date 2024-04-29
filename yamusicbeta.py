@@ -8,8 +8,9 @@ from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
 from yandex_music import ClientAsync
+from telethon import types
 
-from .. import loader, utils, types
+from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 logging.getLogger("yandex_music").propagate = False
