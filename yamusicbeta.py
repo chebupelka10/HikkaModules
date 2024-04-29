@@ -210,7 +210,7 @@ class YmNowMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self._client.edit_message(
+                    await self.client.edit_message(
                         *widget[:2],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
@@ -309,7 +309,6 @@ class YmNowMod(loader.Module):
                 "url": f"https://song.link/ya/{lnk}",
             },
             silent=True,
-            photo=link,  # Adding the cover photo
             audio={
                 "url": link,
                 "title": utils.escape_html(title),
