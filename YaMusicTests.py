@@ -4,7 +4,7 @@ from asyncio import sleep
 
 import aiohttp
 from telethon import TelegramClient, types
-from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
+from telethon.errors.rpcerrorlist import FloodWaitError
 from telethon.tl.functions.account import UpdateProfileRequest
 from yandex_music import ClientAsync
 
@@ -236,11 +236,16 @@ class YaMusicMod(loader.Module):
 
         lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
 
-        await utils.answer(
-            message,
+        await self.client.send_message(
+            message.to_id,
             f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
             parse_mode="html",
             link_preview=False,
+            file=types.InputMediaAudio(
+                file=link,
+                performer=artists,
+                title=title
+            )
         )
 
     @loader.command()
