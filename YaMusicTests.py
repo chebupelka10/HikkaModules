@@ -1,27 +1,24 @@
 import asyncio
 import logging
-from asyncio import sleep
-
 import aiohttp
+from asyncio import sleep
+from yandex_music import ClientAsync
 from telethon import TelegramClient
+from telethon.tl.types import Message
 from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
-from telethon.tl.types import Message
-from yandex_music import ClientAsync
+from .. import loader, utils  # type: ignore
 from telethon import types
-
-from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 logging.getLogger("yandex_music").propagate = False
 
 
 @loader.tds
-class YaMusicMod(loader.Module):
+class YmNowMod(loader.Module):
     """
     Module for yandex music. Based on SpotifyNow, YaNow and WakaTime. [BETA]
     """
-
     strings = {
         "name": "YaMusic",
         "no_token": (
@@ -87,6 +84,7 @@ class YaMusicMod(loader.Module):
         ),
         "configuring": "🙂 <b>Виджет готов и скоро будет обновлен</b>",
     }
+ 
 
     def __init__(self):
         self.config = loader.ModuleConfig(
@@ -144,9 +142,9 @@ class YaMusicMod(loader.Module):
 
                 await client.init()
                 queues = await client.queues_list()
-                last_queue = await client.queue(queues[0].id)
 
                 try:
+                    last_queue = await client.queue(queues[0].id)
                     last_track_id = last_queue.get_current_track()
                     last_track = await last_track_id.fetch_track_async()
                 except:
@@ -178,6 +176,9 @@ class YaMusicMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
+    async def on_unload(self):
+        self._task.cancel()
+
     @loader.command()
     async def automsgcmd(self, message: Message):
         """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
@@ -185,7 +186,7 @@ class YaMusicMod(loader.Module):
         self.set("state", state)
         await utils.answer(
             message,
-            self.strings("state").format(
+            self.strings["state"].format(
                 "on" if state else "off", self.strings("tutorial") if state else ""
             ),
         )
@@ -230,9 +231,7 @@ class YaMusicMod(loader.Module):
         caption = self.strings["playing"].format(
             utils.escape_html(artists),
             utils.escape_html(title),
-            (
-                f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
-            ),
+            f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}",
         )
         try:
             lnk = last_track.id.split(":")[1]
@@ -272,9 +271,9 @@ class YaMusicMod(loader.Module):
             return
 
         queues = await client.queues_list()
-        last_queue = await client.queue(queues[0].id)
 
         try:
+            last_queue = await client.queue(queues[0].id)
             last_track_id = last_queue.get_current_track()
             last_track = await last_track_id.fetch_track_async()
         except:
@@ -411,14 +410,15 @@ class YaMusicMod(loader.Module):
         client = ClientAsync(self.config["YandexMusicToken"])
 
         await client.init()
-        queues = await client.queues_list()
-        last_queue = await client.queue(queues[0].id)
-
         try:
-            last_track_id = last_queue.get_current_track()
-            last_track = await last_track_id.fetch_track_async()
+            queues = await client.queues_list()
+            last_queue = await client.queue(queues[0].id)
         except:
             return
+
+        last_track_id = last_queue.get_current_track()
+
+        last_track = await last_track_id.fetch_track_async()
 
         artists = ", ".join(last_track.artists_name())
         title = last_track.title
@@ -430,7 +430,7 @@ class YaMusicMod(loader.Module):
 
         try:
             await self.client(
-                UpdateProfileRequest(about=text[: 70])
+                UpdateProfileRequest(about=text[: 140 if self._premium else 70])
             )
         except FloodWaitError as e:
             logger.info(f"Sleeping {e.seconds}")
@@ -450,13 +450,12 @@ class YaMusicMod(loader.Module):
                 self.get("widgets", []) + [(chat_id, message_id, message.text)],
             )
 
-            await utils.answer(message, self.strings("configuring"))
+            await utils.answer(message, self.strings["configuring"])
             await self._parse(do_not_loop=True)
         except Exception as e:
             logger.exception("Can't send widget")
-            await utils.answer(message, self.strings("error").format(e))
-
-    async def client_ready(self, *_):
+            await utils.respond(message, self.strings["error"].format(e))
+        async def client_ready(self, *_):
         self.musicdl = await self.import_lib(
             "https://libs.hikariatama.ru/musicdl.py",
             suspend_on_error=True,
