@@ -244,7 +244,6 @@ class YaMusicMod(loader.Module):
             caption,
             file=link,
             link_preview=False,
-            buttons=[types.Button.url("song.link", f"https://song.link/ya/{lnk}")],
         )
 
     @loader.command()
