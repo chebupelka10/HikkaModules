@@ -426,7 +426,7 @@ class YaMusicMod(loader.Module):
         )
 
         try:
-            me = await client.get_me()
+            me = client.get_entity('me')
             if me.is_premium:
               biomax = 140
             else:
