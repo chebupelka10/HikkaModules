@@ -7,6 +7,7 @@ from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
+from yandex_music import ClientAsync
 from telethon import types
 
 from .. import loader, utils
@@ -32,7 +33,7 @@ class YaMusicMod(loader.Module):
         "404": "<emoji document_id=5327834057977896553>👎</emoji> <b>Данный трек {} не найден</b>",
         "playing": (
             "<b><emoji document_id=5188705588925702510>🎶</emoji> Сейчас играет:"
-            " </b><code>{}</code><b> - </b><code>{}</code>\n<b>🕐 {}</b>"
+            " </b><code>{}</code><b> - </b><code>{}</code>\n<emoji document_id=5463424079568584767>🎧</emoji><b> Слушаю трек на Яндекс.Музыка</b>\n<b><emoji document_id=6030821505984630931>🕐</emoji> Трек длится: {}</b>"
         ),
         "no_args": (
             "<b><emoji document_id=5843952899184398024>🚫</emoji> Укажи аргументы!</b>"
@@ -240,10 +241,19 @@ class YaMusicMod(loader.Module):
         else:
             pass
 
-        await message.respond(
-            caption,
-            file=link,
-            link_preview=False,
+        await self.inline.form(
+            message=message,
+            text=caption,
+            reply_markup={
+                "text": "song.link",
+                "url": f"https://song.link/ya/{lnk}",
+            },
+            silent=True,
+            audio={
+                "url": link,
+                "title": utils.escape_html(title),
+                "performer": utils.escape_html(artists),
+            },
         )
 
     @loader.command()
@@ -477,4 +487,4 @@ class YaMusicMod(loader.Module):
             reply_to=message.id,
         )
         if message.out:
-            await message.delete() 
+            await message.delete()
