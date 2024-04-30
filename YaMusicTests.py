@@ -3,7 +3,7 @@ import logging
 import aiohttp
 from asyncio import sleep
 from yandex_music import ClientAsync
-from telethon import TelegramClient
+from telethon import TelegramClient, sync
 from telethon.tl.types import Message
 from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
@@ -426,9 +426,13 @@ class YaMusicMod(loader.Module):
         )
 
         try:
+            me = client.get_me()
+            if me.is_premium:
+              biomax = 140
+            else:
+              biomax = 70
             await self.client(
-                UpdateProfileRequest(about=text[: 70])
-            )
+                UpdateProfileRequest(about=text[: biomax])
         except FloodWaitError as e:
             logger.info(f"Sleeping {e.seconds}")
             await sleep(e.seconds)
