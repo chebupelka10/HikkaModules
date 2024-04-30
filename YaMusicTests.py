@@ -430,7 +430,7 @@ class YaMusicMod(loader.Module):
 
         try:
             await self.client(
-                UpdateProfileRequest(about=text[: 140 if self._premium else 70])
+                UpdateProfileRequest(about=text[: 70])
             )
         except FloodWaitError as e:
             logger.info(f"Sleeping {e.seconds}")
