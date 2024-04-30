@@ -114,7 +114,7 @@ class YaMusicMod(loader.Module):
             ),
         )
     async def premka():
-    me = await client.get_me()
+        me = await client.get_me()
 
     async def on_dlmod(self):
         if not self.get("guide_send", False):
