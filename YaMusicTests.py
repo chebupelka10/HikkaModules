@@ -433,6 +433,7 @@ class YaMusicMod(loader.Module):
               biomax = 70
             await self.client(
                 UpdateProfileRequest(about=text[: biomax])
+            )
         except FloodWaitError as e:
             logger.info(f"Sleeping {e.seconds}")
             await sleep(e.seconds)
