@@ -441,7 +441,7 @@ class YaNowMod(loader.Module):
         )
 
     @loader.command
-    async def yasearch(self, message: types.Message):
+    async def yasearchcmd(self, message: types.Message):
         """Ищет треки на Яндекс.Музыка по названию"""
         args = utils.get_args_raw(message)
         if not args and message.is_reply:
