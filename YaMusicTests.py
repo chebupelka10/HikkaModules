@@ -428,6 +428,7 @@ class YaMusicMod(loader.Module):
         )
 
         try:
+            premka()
             if me.is_premium:
               biomax = 140
             else:
