@@ -437,32 +437,14 @@ class YmNowMod(loader.Module):
             await sleep(e.seconds)
             return
 
-    async def watcher(self, message: Message):
-        try:
-            if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
-                return
-
-            chat_id = utils.get_chat_id(message)
-            message_id = message.id
-
-            self.set(
-                "widgets",
-                self.get("widgets", []) + [(chat_id, message_id, message.text)],
-            )
-
-            await utils.answer(message, self.strings["configuring"])
-            await self._parse(do_not_loop=True)
-        except Exception as e:
-            logger.exception("Can't send widget")
-            await utils.respond(message, self.strings["error"].format(e))
-        async def client_ready(self, *_):
+    async def client_ready(self, *_):
         self.musicdl = await self.import_lib(
             "https://libs.hikariatama.ru/musicdl.py",
             suspend_on_error=True,
         )
 
     @loader.command(ru_doc="<название> - Скачать песню")
-    async def yasearch(self, message: types.Message):
+    async def mdl(self, message: types.Message):
         """ - Download track"""
         args = utils.get_args_raw(message)
         if not args and message.is_reply:
