@@ -402,6 +402,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["not_liked"])
             return
 
+
     @loader.loop(interval=60)
     async def autobio(self):
         client = ClientAsync(self.config["YandexMusicToken"])
@@ -426,18 +427,32 @@ class YaMusicMod(loader.Module):
         )
 
         try:
-            me = await client.get_me()
-            if me.is_premium:
-              biomax = 140
-            else:
-              biomax = 70
             await self.client(
-                UpdateProfileRequest(about=text[: biomax])
+                UpdateProfileRequest(about=text[: 140 if self._premium else 70])
             )
         except FloodWaitError as e:
             logger.info(f"Sleeping {e.seconds}")
             await sleep(e.seconds)
             return
+
+    async def watcher(self, message: Message):
+        try:
+            if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
+                return
+
+            chat_id = utils.get_chat_id(message)
+            message_id = message.id
+
+            self.set(
+                "widgets",
+                self.get("widgets", []) + [(chat_id, message_id, message.text)],
+            )
+
+            await utils.answer(message, self.strings["configuring"])
+            await self._parse(do_not_loop=True)
+        except Exception as e:
+            logger.exception("Can't send widget")
+            await utils.respond(message, self.strings["error"].format(e))
 
     async def client_ready(self, *_):
         self.musicdl = await self.import_lib(
