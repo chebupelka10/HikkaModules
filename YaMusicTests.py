@@ -7,7 +7,6 @@ from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.types import Message
-from yandex_music import ClientAsync
 from telethon import types
 
 from .. import loader, utils
@@ -241,19 +240,11 @@ class YaMusicMod(loader.Module):
         else:
             pass
 
-        await self.inline.form(
-            message=message,
-            text=caption,
-            reply_markup={
-                "text": "song.link",
-                "url": f"https://song.link/ya/{lnk}",
-            },
-            silent=True,
-            audio={
-                "url": link,
-                "title": utils.escape_html(title),
-                "performer": utils.escape_html(artists),
-            },
+        await message.respond(
+            caption,
+            file=link,
+            link_preview=False,
+            buttons=[types.Button.url("song.link", f"https://song.link/ya/{lnk}")],
         )
 
     @loader.command()
@@ -487,4 +478,4 @@ class YaMusicMod(loader.Module):
             reply_to=message.id,
         )
         if message.out:
-            await message.delete()
+            await message.delete() 
