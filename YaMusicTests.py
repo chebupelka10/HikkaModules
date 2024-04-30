@@ -123,6 +123,10 @@ class YaMusicMod(loader.Module):
             self.set("guide_send", True)
 
     async def client_ready(self, client: TelegramClient, db):
+        self.musicdl = await self.import_lib(
+            "https://libs.hikariatama.ru/musicdl.py",
+            suspend_on_error=True,
+        )
         self.client = client
         self.db = db
 
@@ -453,12 +457,6 @@ class YaMusicMod(loader.Module):
         except Exception as e:
             logger.exception("Can't send widget")
             await utils.respond(message, self.strings["error"].format(e))
-
-    async def client_ready(self, *_):
-        self.musicdl = await self.import_lib(
-            "https://libs.hikariatama.ru/musicdl.py",
-            suspend_on_error=True,
-        )
 
     @loader.command(ru_doc="Ищет треки на Яндекс.Музыка по названию")
     async def yasearch(self, message: types.Message):
