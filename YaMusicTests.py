@@ -404,12 +404,12 @@ class YaMusicMod(loader.Module):
 
     @loader.loop(interval=60)
     async def autobio(self):
-        client = ClientAsync(self.config["YandexMusicToken"])
+        YAclient = ClientAsync(self.config["YandexMusicToken"])
 
-        await client.init()
+        await YAclient.init()
         try:
-            queues = await client.queues_list()
-            last_queue = await client.queue(queues[0].id)
+            queues = await YAclient.queues_list()
+            last_queue = await YAclient.queue(queues[0].id)
         except:
             return
 
