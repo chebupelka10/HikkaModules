@@ -3,10 +3,12 @@ import logging
 from asyncio import sleep
 
 import aiohttp
-from telethon import TelegramClient, types
-from telethon.errors.rpcerrorlist import FloodWaitError
+from telethon import TelegramClient
+from telethon.errors.rpcerrorlist import FloodWaitError, MessageNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest
+from telethon.tl.types import Message
 from yandex_music import ClientAsync
+from telethon import types
 
 from .. import loader, utils
 
@@ -153,14 +155,15 @@ class YaMusicMod(loader.Module):
                 artists = ", ".join(last_track.artists_name())
                 title = last_track.title
                 try:
-                    await self.client.send_message(
-                        widget[0],
+                    await self._client.edit_message(
+                        *widget[:2],
                         self.config["AutoMessageTemplate"].format(
                             f"{artists} - {title}"
                             + (f" ({last_track.version})" if last_track.version else "")
                         ),
-                        reply_to=widget[1]
                     )
+                except MessageNotModifiedError:
+                    pass
                 except FloodWaitError:
                     pass
                 except Exception:
@@ -175,11 +178,8 @@ class YaMusicMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
-    async def on_unload(self):
-        self._task.cancel()
-
     @loader.command()
-    async def automsgcmd(self, message: types.Message):
+    async def automsgcmd(self, message: Message):
         """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
         state = not self.get("state", False)
         self.set("state", state)
@@ -191,7 +191,7 @@ class YaMusicMod(loader.Module):
         )
 
     @loader.command()
-    async def ynowcmd(self, message: types.Message):
+    async def ynowcmd(self, message: Message):
         """Get now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -224,40 +224,40 @@ class YaMusicMod(loader.Module):
         title = last_track.title
         if last_track.version:
             title += f" ({last_track.version})"
-
-        duration = last_track.duration_ms // 1000
+        else:
+            pass
 
         caption = self.strings["playing"].format(
             utils.escape_html(artists),
             utils.escape_html(title),
-            f"{duration // 60:02}:{duration % 60:02}",
+            (
+                f"{last_track.duration_ms // 1000 // 60:02}:{last_track.duration_ms // 1000 % 60:02}"
+            ),
         )
+        try:
+            lnk = last_track.id.split(":")[1]
+        except:
+            lnk = last_track.id
+        else:
+            pass
 
-        lnk = last_track.id.split(":")[1] if ":" in last_track.id else last_track.id
-
-        await self.client.send_message(
-            message.to_id,
-            f"{caption}\n🎵 <a href='https://song.link/ya/{lnk}'>song.link</a>",
-            parse_mode="html",
-            link_preview=False,
+        await self.inline.form(
+            message=message,
+            text=caption,
+            reply_markup={
+                "text": "song.link",
+                "url": f"https://song.link/ya/{lnk}",
+            },
+            silent=True,
+            audio={
+                "url": link,
+                "title": utils.escape_html(title),
+                "performer": utils.escape_html(artists),
+            },
         )
-
-        # Sending audio file using send_file
-        audio = types.InputMediaUploadedDocument(
-            file=link,
-            mime_type='audio/mpeg',
-            attributes=[
-                types.DocumentAttributeAudio(
-                    performer=artists,
-                    title=title,
-                    duration=duration
-                )
-            ]
-        )
-        await self.client.send_file(message.to_id, file=audio)
 
     @loader.command()
-    async def ylyrics(self, message: types.Message):
+    async def ylyrics(self, message: Message):
         """Get now playing track lyrics"""
 
         if not self.config["YandexMusicToken"]:
@@ -294,7 +294,7 @@ class YaMusicMod(loader.Module):
         await utils.answer(message, text)
 
     @loader.command()
-    async def ybio(self, message: types.Message):
+    async def ybio(self, message: Message):
         """Show now playing track in your bio"""
 
         if not self.config["YandexMusicToken"]:
@@ -319,7 +319,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["autobiod"])
             self.autobio.stop()
 
-    async def ylikecmd(self, message: types.Message):
+    async def ylikecmd(self, message: Message):
         """❤ Like now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -361,7 +361,7 @@ class YaMusicMod(loader.Module):
             await last_track.like_async()
             await utils.answer(message, self.strings["liked"])
 
-    async def ydislikecmd(self, message: types.Message):
+    async def ydislikecmd(self, message: Message):
         """💔 Dislike now playing track"""
 
         if not self.config["YandexMusicToken"]:
@@ -437,7 +437,7 @@ class YaMusicMod(loader.Module):
             await sleep(e.seconds)
             return
 
-    async def watcher(self, message: types.Message):
+    async def watcher(self, message: Message):
         try:
             if "{YANDEXMUSIC}" not in getattr(message, "text", "") or not message.out:
                 return
@@ -480,7 +480,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings("404").format(args))
             return
 
-        await self.client.send_file(
+        await self._client.send_file(
             message.peer_id,
             result,
             caption=f"<b><emoji document_id=5328014223266030170>🎧</emoji> {utils.ascii_face()}</b>",
