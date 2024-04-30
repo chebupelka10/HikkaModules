@@ -15,7 +15,7 @@ logging.getLogger("yandex_music").propagate = False
 
 
 @loader.tds
-class YaNowMod(loader.Module):
+class YaMusicMod(loader.Module):
     """
     Module to control Yandex Music. Based on unofficial api, and ymnow module. by @nyachepux
     """
