@@ -15,9 +15,9 @@ logging.getLogger("yandex_music").propagate = False
 
 
 @loader.tds
-class YmNowMod(loader.Module):
+class YaNowMod(loader.Module):
     """
-    Module for yandex music. Based on SpotifyNow, YaNow and WakaTime. [BETA]
+    Module to control Yandex Music. Based on unofficial api, and ymnow module. by @nyachepux
     """
     strings = {
         "name": "YaMusic",
@@ -35,7 +35,7 @@ class YmNowMod(loader.Module):
         "no_args": (
             "<b><emoji document_id=5843952899184398024>🚫</emoji> Укажи аргументы!</b>"
         ),
-        "state": "🙂 <b>Виджеты теперь {}</b>\n{}",
+        "state": "<emoji document_id=5462969861007219468>🙂</emoji> <b>Виджеты теперь {}</b>\n{}",
         "tutorial": (
             "ℹ️ <b>Чтобы включить виджет, отправь сообщение в нужный чат с текстом"
             " </b><code>{YANDEXMUSIC}</code>"
@@ -44,11 +44,11 @@ class YmNowMod(loader.Module):
             "<b><emoji document_id=5285037058220372959>☹️</emoji> Ничего не найдено"
             " :(</b>"
         ),
-        "autobioe": "<b>🔁 Autobio включен</b>",
-        "autobiod": "<b>🔁 Autobio выключен</b>",
-        "lyrics": "<b>📜 Текст песни: \n{}</b>",
+        "autobioe": "<b><emoji document_id=6030657343744644592>🔁</emoji> Autobio включен</b>",
+        "autobiod": "<b><emoji document_id=6030657343744644592>🔁</emoji> Autobio выключен</b>",
+        "lyrics": "<b><emoji document_id=6030742019024883631>📄</emoji> Текст песни: \n{}</b>",
         "_cls_doc": (
-            "Модуль для Яндекс.Музыка. Основан на SpotifyNow, YaNow и WakaTime. [BETA]"
+            "Module to control Yandex Music. Based on unofficial api, and ymnow module. by @nyachepux"
         ),
         "already_liked": (
             "<b><emoji document_id=5843952899184398024>🚫</emoji> Текущий трек уже"
@@ -67,7 +67,7 @@ class YmNowMod(loader.Module):
             " трек!</b>"
         ),
         "my_wave": (
-            "<b><emoji document_id=5472377424228396503>🤭</emoji> Ты слушаешь трек в"
+            "<b><emoji document_id=5327834057977896553>👎</emoji> Ты слушаешь трек в"
             " Моей Волне, я не могу распознать его.</b>"
         ),
         "_cfg_yandexmusictoken": "Токен аккаунта Яндекс.Музыка",
@@ -176,12 +176,9 @@ class YmNowMod(loader.Module):
 
             await asyncio.sleep(int(self.config["update_interval"]))
 
-    async def on_unload(self):
-        self._task.cancel()
-
     @loader.command()
-    async def automsgcmd(self, message: Message):
-        """Toggle YandexMusic widgets' updates(sample: https://t.me/vsecoder_bio/24)"""
+    async def yaautomsgcmd(self, message: Message):
+        """Включает/выключает виджет Яндекс Музыки"""
         state = not self.get("state", False)
         self.set("state", state)
         await utils.answer(
@@ -192,8 +189,8 @@ class YmNowMod(loader.Module):
         )
 
     @loader.command()
-    async def ynowcmd(self, message: Message):
-        """Get now playing track"""
+    async def yanowcmd(self, message: Message):
+        """Показывает что вы слушаете на Яндекс.Музыка"""
 
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -256,8 +253,8 @@ class YmNowMod(loader.Module):
         )
 
     @loader.command()
-    async def ylyrics(self, message: Message):
-        """Get now playing track lyrics"""
+    async def yalyrics(self, message: Message):
+        """Показывает текст песни которую вы слушаете"""
 
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -293,8 +290,8 @@ class YmNowMod(loader.Module):
         await utils.answer(message, text)
 
     @loader.command()
-    async def ybio(self, message: Message):
-        """Show now playing track in your bio"""
+    async def yabio(self, message: Message):
+        """Показывает трек который вы слушаете в описании вашего профиля"""
 
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -318,8 +315,8 @@ class YmNowMod(loader.Module):
             await utils.answer(message, self.strings["autobiod"])
             self.autobio.stop()
 
-    async def ylikecmd(self, message: Message):
-        """❤ Like now playing track"""
+    async def yalikecmd(self, message: Message):
+        """❤ Ставит лайк на трек который вы слушаете"""
 
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -360,8 +357,8 @@ class YmNowMod(loader.Module):
             await last_track.like_async()
             await utils.answer(message, self.strings["liked"])
 
-    async def ydislikecmd(self, message: Message):
-        """💔 Dislike now playing track"""
+    async def yadislikecmd(self, message: Message):
+        """💔 Ставит дизлайк на трек который вы слушаете"""
 
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -443,9 +440,9 @@ class YmNowMod(loader.Module):
             suspend_on_error=True,
         )
 
-    @loader.command(ru_doc="<название> - Скачать песню")
-    async def mdl(self, message: types.Message):
-        """ - Download track"""
+    @loader.command
+    async def yasearch(self, message: types.Message):
+        """Ищет треки на Яндекс.Музыка по названию"""
         args = utils.get_args_raw(message)
         if not args and message.is_reply:
             reply = await message.get_reply_message()
