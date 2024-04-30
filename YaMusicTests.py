@@ -446,7 +446,7 @@ class YaNowMod(loader.Module):
         args = utils.get_args_raw(message)
         if not args and message.is_reply:
             reply = await message.get_reply_message()
-            args = reply.raw_text.replace(".mdl", "").strip()
+            args = reply.raw_text.replace(".yasearch", "").strip()
         elif not args:
             await utils.answer(message, self.strings("args"))
             return
