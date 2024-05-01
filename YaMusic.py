@@ -1,3 +1,5 @@
+# meta developer: @chepuxmodules
+
 import asyncio
 import logging
 import aiohttp
@@ -17,7 +19,7 @@ logging.getLogger("yandex_music").propagate = False
 @loader.tds
 class YaMusicMod(loader.Module):
     """
-    Module to control Yandex Music. Based on unofficial api, and ymnow module. by @nyachepux
+    Module to control Yandex Music. Based on unofficial api, and ymnow module. by @nitrocot
     """
     strings = {
         "name": "YaMusic",
