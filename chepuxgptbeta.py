@@ -1,19 +1,20 @@
 import time
-from telethon import types, events
-from .. import loader, utils
+from telethon import types, events, utils
+from .. import loader
 
 @loader.tds
 class ChepuxGPTBetaMod(loader.Module):
     """Позволяет разговаривать с ChatGPT без api key"""
-    is_generating = False  # Флаг состояния для проверки, идет ли генерация ответа
 
     strings = {
         "name": "ChepuxGPT",
         "generating": "Генерирую ответ...",
         "question": "Вопрос: {}",
         "answer": "Ответ: {}",
-        "busy": "Подождите, пока будет сгенерирован предыдущий ответ."
+        "wait": "Подождите, идет генерация ответа на предыдущий запрос."
     }
+
+    generating_response = False
 
     async def client_ready(self, client, db):
         self.client = client
@@ -21,8 +22,8 @@ class ChepuxGPTBetaMod(loader.Module):
     @loader.command()
     async def gptcmd(self, message: types.Message):
         """Новая тема + задать вопрос"""
-        if self.is_generating:
-            await utils.answer(message, self.strings["busy"])
+        if self.generating_response:
+            await utils.answer(message, self.strings["wait"])
             return
 
         query = utils.get_args_raw(message)
@@ -30,42 +31,43 @@ class ChepuxGPTBetaMod(loader.Module):
             await utils.answer(message, "Укажите запрос после команды .gptcmd")
             return
 
-        self.is_generating = True  # Устанавливаем флаг в True, начинается генерация ответа
-        bot_id = 7072898560
-        bot = await self.client.get_entity(bot_id)
-        reset_message = await self.client.send_message(bot, "/reset")
-        await reset_message.delete()
-        gpt_message = await message.edit(self.strings["generating"])
+        self.generating_response = True
+        bot_id = 7072898560  # ID бота
 
-        async with self.client.conversation(bot) as conv:
-            await conv.send_message(query)
-            response = await self._get_response(conv)
+        try:
+            # Загружаем сущность пользователя
+            bot = await self.client.get_entity(bot_id)
 
-        # Отправляем новое сообщение с ответом и удаляем сообщение "Генерирую ответ..."
-        await message.respond(
-            "{}\n\n{}".format(
-                self.strings["question"].format(query),
-                self.strings["answer"].format(response)
+            reset_message = await self.client.send_message(bot, "/reset")
+            await reset_message.delete()
+
+            gpt_message = await message.edit(self.strings["generating"])
+
+            async with self.client.conversation(bot) as conv:
+                await conv.send_message(query)
+                response = await self._get_response(conv)
+
+            await gpt_message.edit(
+                "{}\n\n{}".format(
+                    self.strings["question"].format(query),
+                    self.strings["answer"].format(response)
+                )
             )
-        )
-        await gpt_message.delete()  # Удаляем сообщение "Генерирую ответ..."
-        self.is_generating = False  # Сбрасываем флаг после получения ответа
+        finally:
+            self.generating_response = False
 
     async def _get_response(self, conv):
         start_time = time.time()
         last_edit_time = start_time
-        last_msg = None
 
         while True:
             msg = await conv.get_response()
             current_time = time.time()
 
-            if msg == last_msg and (current_time - last_edit_time) > 2:
+            if msg.edit_date and (current_time - msg.edit_date.timestamp()) > 2:
                 return msg.text
-
-            if msg.text != last_msg:
-                last_edit_time = current_time
-                last_msg = msg.text
 
             if msg.text == "Готово!":
                 continue
+
+            await msg.edit(msg.text)
