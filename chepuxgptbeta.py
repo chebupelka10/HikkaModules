@@ -19,15 +19,15 @@ class ChepuxGPTBetaMod(loader.Module):
         self.client = client
 
     @loader.command()
-    async def gpt(self, message: types.Message):
+    async def gptcmd(self, message: types.Message):
         """Новая тема + задать вопрос"""
         if self.is_generating:
-            await utils.answer(message, self.strings("busy"))
+            await utils.answer(message, self.strings["busy"])
             return
 
         query = utils.get_args_raw(message)
         if not query:
-            await utils.answer(message, "Укажите запрос после команды .gpt")
+            await utils.answer(message, "Укажите запрос после команды .gptcmd")
             return
 
         self.is_generating = True  # Устанавливаем флаг в True, начинается генерация ответа
@@ -35,7 +35,7 @@ class ChepuxGPTBetaMod(loader.Module):
         bot = await self.client.get_entity(bot_id)
         reset_message = await self.client.send_message(bot, "/reset")
         await reset_message.delete()
-        gpt_message = await message.edit(self.strings("generating"))
+        gpt_message = await message.edit(self.strings["generating"])
 
         async with self.client.conversation(bot) as conv:
             await conv.send_message(query)
@@ -43,8 +43,8 @@ class ChepuxGPTBetaMod(loader.Module):
 
         await gpt_message.edit(
             "{}\n\n{}".format(
-                self.strings("question").format(query),
-                self.strings("answer").format(response)
+                self.strings["question"].format(query),
+                self.strings["answer"].format(response)
             )
         )
         self.is_generating = False  # Сбрасываем флаг после получения ответа
