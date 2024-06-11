@@ -41,12 +41,14 @@ class ChepuxGPTBetaMod(loader.Module):
             await conv.send_message(query)
             response = await self._get_response(conv)
 
-        await gpt_message.edit(
+        # Отправляем новое сообщение с ответом и удаляем сообщение "Генерирую ответ..."
+        await message.respond(
             "{}\n\n{}".format(
                 self.strings["question"].format(query),
                 self.strings["answer"].format(response)
             )
         )
+        await gpt_message.delete()  # Удаляем сообщение "Генерирую ответ..."
         self.is_generating = False  # Сбрасываем флаг после получения ответа
 
     async def _get_response(self, conv):
