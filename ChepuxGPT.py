@@ -1,6 +1,7 @@
 # meta developer: @chepuxmodules
 
 from .. import loader, utils
+from telethon import functions, types
 import g4f.client
 import nest_asyncio
 import asyncio
@@ -64,9 +65,19 @@ class ChepuxGPTMod(loader.Module):
                 return
         
         self.generating_image = True
+        
         await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение...</b>")
         await self.client.send_message("@awinic_gpt_bot", "/start")
         await self.client.send_message("@awinic_gpt_bot", "/reset")
+        
+        awinic_id = 7072898560
+        
+        await self.client(functions.account.UpdateNotifySettingsRequest(
+            peer=await self.client.get_input_entity(awinic_id),
+            settings=types.InputPeerNotifySettings(
+            mute_until=2**31 - 1
+            )
+        ))
         
         await asyncio.sleep(2)
         image_request = f"/image {request_text}"
@@ -80,8 +91,5 @@ class ChepuxGPTMod(loader.Module):
             await utils.answer(message, "<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!</b>")
         else:
             await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: напишите @chepuxcat</b>")
-        self.generating_image = False
         
-    async def helpspamcmd(self, message):
-        """Используйте gpt <вопрос> или ответьте на сообщение чтобы спросить вопрос у chatgpt"""
-        await utils.answer(message, "<b>Если при генерации изображений вам приходят сообщения от другого чата, это нормально.\n\nГенерация изображений происходит через другого бота поетому я вас советую если вас бесят эти уведомления:\n\nЧтобы это исправить поместите в архив @awinic_gpt_bot, а также выключите у него уведомления.</b>")
+        self.generating_image = False
