@@ -33,6 +33,8 @@ class ChepuxGPTMod(loader.Module):
                 await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
                 return
 
+        question = question.replace(".gpt", "").strip()
+        
         prompt = [{"role": "user", "content": question}]
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ...</b>")
@@ -63,6 +65,8 @@ class ChepuxGPTMod(loader.Module):
             else:
                 await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали описание изображения после imagine</b>")
                 return
+        
+        request_text = request_text.replace(".imagine", "").strip()
         
         self.generating_image = True
         
