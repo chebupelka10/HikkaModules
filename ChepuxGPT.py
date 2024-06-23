@@ -34,6 +34,7 @@ class ChepuxGPTMod(loader.Module):
                 return
 
         question = question.replace(".gpt", "").strip()
+        question = question.replace(".гпт", "").strip()
         
         prompt = [{"role": "user", "content": question}]
 
