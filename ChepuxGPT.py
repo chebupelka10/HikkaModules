@@ -18,7 +18,7 @@ class ChepuxGPTMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            "GPTModel", "gpt-4", "Название модели для генерации ответов"
+            "GPTModel", "gpt-4o", "Название модели для генерации ответов"
         )
 
     async def gptcmd(self, message):
@@ -43,7 +43,7 @@ class ChepuxGPTMod(loader.Module):
             client = g4f.client.Client()
             response = client.chat.completions.create(
                 model=self.config["GPTMODEL"],
-                provider=g4f.Provider.Aichatos,
+                provider=g4f.Provider.Liaobots,
                 messages=prompt
             )
             answer = response.choices[0].message.content
