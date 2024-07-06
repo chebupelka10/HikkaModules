@@ -43,11 +43,11 @@ class ChepuxGPTMod(loader.Module):
             client = g4f.client.Client()
             response = client.chat.completions.create(
                 model=self.config["GPTMODEL"],
-                provider=g4f.Provider.Liaobots,
+                provider=g4f.Provider.Koala,
                 messages=prompt
             )
             answer = response.choices[0].message.content
-            await utils.answer(message, f"<b><emoji document_id=5409229529392618973>🤔</emoji> Вопрос:</b> {question}\n<b><emoji document_id=5327958075158568158>💃</emoji> Ответ:</b> {answer}")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
 
@@ -93,8 +93,8 @@ class ChepuxGPTMod(loader.Module):
 
         if response and response[0].photo:
             await message.client.send_file(message.to_id, response[0].photo, reply_to=message.id)
-            await utils.answer(message, "<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!</b>")
+            await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {request_text}</b>")
         else:
-            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: напишите @chepuxcat</b>")
+            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Вы используете ненормативную лексику в запросе который была заблокирован</b>")
         
         self.generating_image = False
