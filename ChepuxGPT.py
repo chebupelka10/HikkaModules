@@ -43,7 +43,7 @@ class ChepuxGPTMod(loader.Module):
             client = g4f.client.Client()
             response = client.chat.completions.create(
                 model=self.config["GPTMODEL"],
-                provider=g4f.Provider.Koala,
+                provider=g4f.Provider.Liaobots,
                 messages=prompt
             )
             answer = response.choices[0].message.content
@@ -95,6 +95,6 @@ class ChepuxGPTMod(loader.Module):
             await message.client.send_file(message.to_id, response[0].photo, reply_to=message.id)
             await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {request_text}</b>")
         else:
-            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Вы используете ненормативную лексику в запросе который была заблокирован</b>")
+            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Вы используете ненормативную лексику в запросе который была заблокирован, либо вы ввели пустой запрос.</b>")
         
         self.generating_image = False
