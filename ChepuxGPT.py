@@ -42,8 +42,8 @@ class ChepuxGPTMod(loader.Module):
         try:
             client = g4f.client.Client()
             response = client.chat.completions.create(
-                model=self.config["GPTMODEL"],
-                provider=g4f.Provider.Liaobots,
+                model=gpt-3.5-turbo,
+                provider=g4f.Provider.Pizzagpt,
                 messages=prompt
             )
             answer = response.choices[0].message.content
