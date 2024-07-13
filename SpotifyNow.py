@@ -613,9 +613,9 @@ class SpotifyMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделал инструкцию которая есть в инструкции комманды. (Посмотрите help spotifyow)</b>")
-        else:
-            await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
+            else:
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
 
     @error_handler
     async def snowtrackcmd(self, message):
@@ -627,9 +627,10 @@ class SpotifyMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделал инструкцию которая есть в инструкции комманды. (Посмотрите help spotifyow)</b>")
-        else:
-            await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
+            else:
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+
 
     async def watcher(self, message: Message):
         """Watcher is used to update token"""
