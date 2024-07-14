@@ -169,7 +169,7 @@ class SpotifyMod(loader.Module):
         "_cmd_doc_unauth": "Отменить аутентификацию",
         "_cmd_doc_sbio": "Включить автоматическое био",
         "_cmd_doc_stokrefresh": "Принудительное обновление токена",
-        "_cmd_doc_snow": "Показывает что вы слушаете на Spotify. Для того чтобы работало необходимо авторизоватся в боте @spotipiebot",
+        "_cmd_doc_snow": "Показывает что вы слушаете на Spotify. Только для бета тестеров. Писать @chepuxcat",
         "_cls_doc": (
             "Тулкит для Spotify. Создатель @chepuxcat"
         ),
