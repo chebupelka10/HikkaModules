@@ -605,10 +605,10 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     async def snowcmd(self, message):
-        """Показывает что вы слушаете на Spotify. Для того чтобы работало необходимо авторизоватся в боте @spotipiebot"""
-        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на spotify</b>")
+        """Показывает что вы слушаете на Spotify. Только для бета тестеров. Писать @chepuxcat"""
+        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
-            results = await message.client.inline_query("@spotipiebot", "")
+            results = await message.client.inline_query("@properdeezbot", "...")
             await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
@@ -619,10 +619,10 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     async def snowtrackcmd(self, message):
-        """Показывает что вы слушаете на Spotify и отправляет его треком. Для того чтобы работало необходимо авторизоватся в боте @nowplbot"""
-        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на spotify</b>")
+        """Показывает что вы слушаете на Spotify и отправляет его треком. Только для бета тестеров. Писать @chepuxcat"""
+        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
-            results = await message.client.inline_query("@nowplbot", "")
+            results = await message.client.inline_query("@properdeezbot", "")
             await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
