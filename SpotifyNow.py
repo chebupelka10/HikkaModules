@@ -447,27 +447,21 @@ class SpotifyMod(loader.Module):
     @tokenized
     @autodelete
     async def sfindcmd(self, message: Message):
-        """Ищет информацию о треке"""
-        args = utils.get_args_raw(message)
-        if not args:
-            await utils.answer(message, self.strings("404"))
-
-        message = await utils.answer(message, self.strings("searching"))
-
-        try:
-            track = self.sp.track(args)
-        except Exception:
-            search = self.sp.search(q=args, type="track", limit=1)
-            if not search:
-                await utils.answer(message, self.strings("404"))
+        """Ищет трек по названию"""
+        args = utils.get_args(message)
+        if args:
+            await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Ищу трек на Spotify</b>")
             try:
-                track = search["tracks"]["items"][0]
-                assert track
-            except Exception:
-                await utils.answer(message, self.strings("404"))
-                return
-
-        await self._open_track(track, message)
+                results = await message.client.inline_query("@properdeezbot", " ".join(args))
+                await results[0].click(message.chat_id, hide_via=True)
+                await message.delete()
+            except Exception as e:
+                if "The bot did not answer to the callback query in time" in str(e):
+                    await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, трека не существует.")
+                else:
+                    await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+        else:
+            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Вы не указали название песни</b>")
 
     async def _open_track(
         self,
