@@ -163,7 +163,7 @@ class SpotifyMod(loader.Module):
         "no_music": (
             "<emoji document_id=5312526098750252863>🚫</emoji> <b>Музыка не играет!</b>"
         ),
-        "_cmd_doc_sfind": "Найти информацию о треке",
+        "_cmd_doc_sfind": "Ищет трек по названию",
         "_cmd_doc_sauth": "Первый этап аутентификации",
         "_cmd_doc_scode": "Второй этап аутентификации",
         "_cmd_doc_unauth": "Отменить аутентификацию",
@@ -369,7 +369,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def srepeatcmd(self, message: Message):
         """💫 Повторять трек"""
         self.sp.repeat("track")
@@ -377,7 +376,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def sderepeatcmd(self, message: Message):
         """✋ Перестать повторять трек"""
         self.sp.repeat("context")
@@ -385,7 +383,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def snextcmd(self, message: Message):
         """👉 Следующий трек"""
         self.sp.next_track()
@@ -393,7 +390,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def spausecmd(self, message: Message):
         """🤚 Пауза"""
         self.sp.pause_playback()
@@ -401,7 +397,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def splaycmd(self, message: Message, from_sq: bool = False):
         """▶️ Продолжить играть"""
         args = utils.get_args_raw(message)
@@ -444,24 +439,30 @@ class SpotifyMod(loader.Module):
         )
 
     @error_handler
-    @tokenized
-    @autodelete
     async def sfindcmd(self, message: Message):
         """Ищет трек по названию"""
-        args = utils.get_args(message)
-        if args:
-            await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Ищу трек на Spotify</b>")
-            try:
-                results = await message.client.inline_query("@properdeezbot", " ".join(args))
-                await results[0].click(message.chat_id, hide_via=True)
-                await message.delete()
-            except Exception as e:
-                if "The bot did not answer to the callback query in time" in str(e):
-                    await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, трека не существует.")
-                else:
-                    await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
-        else:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b>Вы не указали название песни</b>")
+        args = utils.get_args_raw(message)
+    
+        if not args:
+            reply = await message.get_reply_message()
+            if reply:
+                args = reply.raw_text
+            else:
+                await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji> <b>Вы не указали название песни</b>")
+                return
+    
+        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Ищу трек на Spotify</b>")
+    
+        try:
+            results = await message.client.inline_query("@properdeezbot", args)
+            await results[0].click(message.chat_id, hide_via=True)
+            await message.delete()
+        except Exception as e:
+            if "The bot did not answer to the callback query in time" in str(e):
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, трека не существует.</b>")
+            else:
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
+
 
     async def _open_track(
         self,
@@ -513,7 +514,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def sbackcmd(self, message: Message):
         """⏮ Предыдущий трек"""
         self.sp.previous_track()
@@ -521,7 +521,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def sbegincmd(self, message: Message):
         """⏪ Трек заного"""
         self.sp.seek_track(0)
@@ -529,7 +528,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def slikecmd(self, message: Message):
         """❤️ Поставить лайк на трек"""
         cupl = self.sp.current_playback()
@@ -549,7 +547,6 @@ class SpotifyMod(loader.Module):
             )
 
     @error_handler
-    @autodelete
     async def scodecmd(self, message: Message):
         """Second stage of auth"""
         url = message.message.split(" ")[1]
@@ -559,7 +556,6 @@ class SpotifyMod(loader.Module):
         await utils.answer(message, self.strings("authed"))
 
     @error_handler
-    @autodelete
     async def unauthcmd(self, message: Message):
         """Deauth from Spotify API"""
         self.set("acs_tkn", None)
@@ -568,7 +564,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def sbiocmd(self, message: Message):
         """Toggle bio playback streaming"""
         current = self.get("autobio", False)
@@ -586,7 +581,6 @@ class SpotifyMod(loader.Module):
 
     @error_handler
     @tokenized
-    @autodelete
     async def stokrefreshcmd(self, message: Message):
         """Force refresh token"""
         self.set(
@@ -607,9 +601,9 @@ class SpotifyMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
             else:
-                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
 
     @error_handler
     async def snowtrackcmd(self, message):
@@ -621,9 +615,9 @@ class SpotifyMod(loader.Module):
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
-                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji><b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
             else:
-                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji><b>Произошла ошибка: {e}</b>")
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
 
 
     async def watcher(self, message: Message):
