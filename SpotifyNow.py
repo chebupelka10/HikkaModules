@@ -442,7 +442,7 @@ class SpotifyMod(loader.Module):
     async def sfindcmd(self, message: Message):
         """Ищет трек по названию"""
         args = utils.get_args_raw(message)
-        
+    
         if not args:
             reply = await message.get_reply_message()
             if reply:
@@ -450,20 +450,19 @@ class SpotifyMod(loader.Module):
             else:
                 await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji> <b>Вы не указали название песни</b>")
                 return
-
-        reply_to = message.reply_to_msg_id if message.is_reply else message.chat_id
-
+    
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Ищу трек на Spotify</b>")
-        
+    
         try:
             results = await message.client.inline_query("@properdeezbot", args)
-            await results[0].click(reply_to, hide_via=True)
+            await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
                 await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, трека не существует.</b>")
             else:
                 await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
+
 
     async def _open_track(
         self,
@@ -595,11 +594,10 @@ class SpotifyMod(loader.Module):
     @error_handler
     async def snowcmd(self, message):
         """Показывает что вы слушаете на Spotify. Только для бета тестеров. Писать @chepuxcat"""
-        reply_to = message.reply_to_msg_id if message.is_reply else message.chat_id
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
             results = await message.client.inline_query("@properdeezbot", "...")
-            await results[0].click(reply_to, hide_via=True)
+            await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
@@ -610,17 +608,17 @@ class SpotifyMod(loader.Module):
     @error_handler
     async def snowtrackcmd(self, message):
         """Показывает что вы слушаете на Spotify и отправляет его треком. Только для бета тестеров. Писать @chepuxcat"""
-        reply_to = message.reply_to_msg_id if message.is_reply else message.chat_id
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
             results = await message.client.inline_query("@properdeezbot", "")
-            await results[0].click(reply_to, hide_via=True)
+            await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
                 await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
             else:
                 await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
+
 
     async def watcher(self, message: Message):
         """Watcher is used to update token"""
