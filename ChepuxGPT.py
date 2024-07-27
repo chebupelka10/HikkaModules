@@ -1,10 +1,7 @@
-# meta developer: @chepuxmodules
-
-from .. import loader, utils
-from telethon import functions, types
-import g4f.client
-import nest_asyncio
+import requests
 import asyncio
+from telethon import functions, types
+from .. import loader, utils
 
 @loader.tds
 class ChepuxGPTMod(loader.Module):
@@ -15,11 +12,6 @@ class ChepuxGPTMod(loader.Module):
     
     async def client_ready(self, client, db):
         self.client = client
-
-    def __init__(self):
-        self.config = loader.ModuleConfig(
-            "GPTModel", "gpt-4o", "Название модели для генерации ответов"
-        )
 
     async def gptcmd(self, message):
         """Используйте gpt <вопрос> или ответьте на сообщение чтобы спросить вопрос у chatgpt"""
@@ -40,13 +32,16 @@ class ChepuxGPTMod(loader.Module):
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ...</b>")
         try:
-            client = g4f.client.Client()
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                provider=g4f.Provider.Pizzagpt,
-                messages=prompt
-            )
-            answer = response.choices[0].message.content
+            response = requests.post('http://api.onlysq.ru/gpt/v1', json=prompt)
+            response_json = response.json()
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ. Проверьте API."
+
             await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
@@ -86,10 +81,10 @@ class ChepuxGPTMod(loader.Module):
         
         await asyncio.sleep(2)
         image_request = f"/image {request_text}"
-        await message.client.send_message(7072898560, image_request)
+        await message.client.send_message(awinic_id, image_request)
 
         await asyncio.sleep(20)
-        response = await message.client.get_messages(7072898560, limit=1)
+        response = await message.client.get_messages(awinic_id, limit=1)
 
         if response and response[0].photo:
             await message.client.send_file(message.to_id, response[0].photo, reply_to=message.id)
