@@ -32,7 +32,7 @@ class ChepuxGPTMod(loader.Module):
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ...</b>")
         try:
-            response = requests.post('http://api.onlysq.ru/gpt/v1', json=prompt)
+            response = requests.post('http://api.onlysq.ru/ai/v1', json=prompt)
             response_json = response.json()
             if 'answer' in response_json:
                 answer = response_json['answer']
