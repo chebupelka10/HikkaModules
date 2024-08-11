@@ -1,5 +1,7 @@
 import requests
 import asyncio
+import aiohttp
+import io
 from telethon import functions, types
 from .. import loader, utils
 
@@ -7,8 +9,6 @@ from .. import loader, utils
 class ChepuxGPTMod(loader.Module):
     """Задавайте вопросы chatgpt а также генерируйте изображения by @chepuxcat"""
     strings = {"name": "ChepuxGPT"}
-    
-    generating_image = False
     
     async def client_ready(self, client, db):
         self.client = client
@@ -48,11 +48,7 @@ class ChepuxGPTMod(loader.Module):
 
     async def imaginecmd(self, message):
         """Используйте imagine <запрос> или ответьте на сообщение чтобы сгенерировать изображение"""
-        
-        if self.generating_image:
-            await utils.answer(message, "<emoji document_id=5314591660192046611>❌</emoji><b> Сейчас идет генерация другого изображения</b>")
-            return
-        
+
         request_text = utils.get_args_raw(message)
         if not request_text:
             reply = await message.get_reply_message()
@@ -64,32 +60,38 @@ class ChepuxGPTMod(loader.Module):
         
         request_text = request_text.replace(".imagine", "").strip()
         
-        self.generating_image = True
-        
         await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение...</b>")
-        await self.client.send_message("@awinic_gpt_bot", "/start")
-        await self.client.send_message("@awinic_gpt_bot", "/reset")
         
-        awinic_id = 7072898560
-        
-        await self.client(functions.account.UpdateNotifySettingsRequest(
-            peer=await self.client.get_input_entity(awinic_id),
-            settings=types.InputPeerNotifySettings(
-            mute_until=2**31 - 1
-            )
-        ))
-        
-        await asyncio.sleep(2)
-        image_request = f"/image {request_text}"
-        await message.client.send_message(awinic_id, image_request)
+        try:
+            image_urls = await self.generate_image(request_text)
+            if image_urls:
+                await message.client.send_file(message.to_id, image_urls, reply_to=message.id)
+                await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {request_text}</b>")
+            else:
+                await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения.</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
 
-        await asyncio.sleep(20)
-        response = await message.client.get_messages(awinic_id, limit=1)
+    async def generate_image(self, prompt):
+        """Generate image using the external API"""
+        url = 'http://api.onlysq.ru/ai/v2'
+        data = {
+            "model": "kandinsky",
+            "request": {'messages': [{"content": prompt}], "meta": {"image_count": 1}}
+        }
 
-        if response and response[0].photo:
-            await message.client.send_file(message.to_id, response[0].photo, reply_to=message.id)
-            await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {request_text}</b>")
-        else:
-            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Вы используете ненормативную лексику в запросе который была заблокирован, либо вы ввели пустой запрос.</b>")
-        
-        self.generating_image = False
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=data, timeout=110) as response:
+                response.raise_for_status()
+                response_json = await response.json()
+                images = response_json.get('answer', [])
+
+                image_files = []
+                for image_url in images:
+                    async with session.get(image_url) as image_response:
+                        image_data = await image_response.read()
+                        image_buffer = io.BytesIO(image_data)
+                        image_buffer.name = image_url.split('/')[-1]
+                        image_files.append(image_buffer)
+
+                return image_files
