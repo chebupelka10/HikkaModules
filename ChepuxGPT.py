@@ -1,15 +1,15 @@
 import requests
 import asyncio
-import aiohttp
-import io
 from telethon import functions, types
 from .. import loader, utils
+import aiohttp
+import io
 
 @loader.tds
 class ChepuxGPTMod(loader.Module):
-    """Задавайте вопросы chatgpt а также генерируйте изображения by @chepuxcat"""
+    """Задавайте вопросы chatgpt, а также генерируйте изображения by @chepuxcat"""
     strings = {"name": "ChepuxGPT"}
-    
+
     async def client_ready(self, client, db):
         self.client = client
 
@@ -47,8 +47,8 @@ class ChepuxGPTMod(loader.Module):
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
 
     async def imaginecmd(self, message):
-        """Используйте imagine <запрос> или ответьте на сообщение чтобы сгенерировать изображение"""
-
+        """Используйте imagine <запрос> чтобы сгенерировать изображение. Можно указать количество изображений через <кол-во>"""
+        
         request_text = utils.get_args_raw(message)
         if not request_text:
             reply = await message.get_reply_message()
@@ -59,39 +59,44 @@ class ChepuxGPTMod(loader.Module):
                 return
         
         request_text = request_text.replace(".imagine", "").strip()
-        
+
+        # Разделяем запрос на описание и количество изображений
+        parts = request_text.rsplit(' ', 1)
+        if len(parts) == 2 and parts[1].isdigit():
+            image_count = int(parts[1])
+            prompt = parts[0]
+        else:
+            image_count = 1
+            prompt = request_text
+
         await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение...</b>")
-        
+
         try:
-            image_urls = await self.generate_image(request_text)
-            if image_urls:
-                await message.client.send_file(message.to_id, image_urls, reply_to=message.id)
-                await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Фотография готова, отправил её в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {request_text}</b>")
-            else:
-                await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения.</b>")
-        except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+            dict_to_send = {
+                "model": "kandinsky",
+                "request": {'messages': [{"content": prompt}], "meta": {"image_count": image_count}}
+            }
 
-    async def generate_image(self, prompt):
-        """Generate image using the external API"""
-        url = 'http://api.onlysq.ru/ai/v2'
-        data = {
-            "model": "kandinsky",
-            "request": {'messages': [{"content": prompt}], "meta": {"image_count": 1}}
-        }
+            async with aiohttp.ClientSession() as session:
+                async with session.post('http://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
+                    response.raise_for_status()
+                    response_json = await response.json()
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=data, timeout=110) as response:
-                response.raise_for_status()
-                response_json = await response.json()
-                images = response_json.get('answer', [])
+                    images = response_json.get('answer', [])
+                    
+                    for index, image_url in enumerate(images):
+                        image_url = image_url.replace('https://', 'http://')
+                        async with session.get(image_url) as image_response:
+                            image_data = await image_response.read()
+                            image_buffer = io.BytesIO(image_data)
+                            image_buffer.name = image_url.split('/')[-1]
+                            await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
 
-                image_files = []
-                for image_url in images:
-                    async with session.get(image_url) as image_response:
-                        image_data = await image_response.read()
-                        image_buffer = io.BytesIO(image_data)
-                        image_buffer.name = image_url.split('/')[-1]
-                        image_files.append(image_buffer)
-
-                return image_files
+                    if images:
+                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение(-я) готово(-ы)!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}</b>")
+                    else:
+                        await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
+        except aiohttp.ClientError as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при запросе к API:</b> {e}")
+        except ValueError:
+            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при обработке ответа от API.</b>")
