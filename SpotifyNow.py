@@ -596,7 +596,7 @@ class SpotifyMod(loader.Module):
         """Показывает что вы слушаете на Spotify. Только для бета тестеров. Писать @chepuxcat"""
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
-            results = await message.client.inline_query("@properdeezbot", "...")
+            results = await message.client.inline_query("@Spotipiebot", "")
             await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
@@ -610,7 +610,21 @@ class SpotifyMod(loader.Module):
         """Показывает что вы слушаете на Spotify и отправляет его треком. Только для бета тестеров. Писать @chepuxcat"""
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
         try:
-            results = await message.client.inline_query("@properdeezbot", "")
+            results = await message.client.inline_query("@nowplayv2bot", "")
+            await results[0].click(message.chat_id, hide_via=True)
+            await message.delete()
+        except Exception as e:
+            if "The bot did not answer to the callback query in time" in str(e):
+                await utils.answer(message, "<emoji document_id=5312526098750252863>❌</emoji> <b>Ошибка, вы не слушаете трек, или не сделали инструкцию которая есть в инструкции команды. (Посмотрите help spotifyow)</b>")
+            else:
+                await utils.answer(message, f"<emoji document_id=5312526098750252863>❌</emoji> <b>Произошла ошибка: {e}</b>")
+                
+    @error_handler
+    async def slyricscmd(self, message):
+        """Показывает текст прослушиваемой песни. Только для бета тестеров. Писать @chepuxcat"""
+        await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Собираю данные о том, что вы слушаете на Spotify</b>")
+        try:
+            results = await message.client.inline_query("@nowplayv2bot", ":l")
             await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
