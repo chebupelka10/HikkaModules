@@ -454,7 +454,7 @@ class SpotifyMod(loader.Module):
         await utils.answer(message, "<emoji document_id=5348240937954851856>🎧</emoji> <b>Ищу трек на Spotify</b>")
     
         try:
-            results = await message.client.inline_query("@properdeezbot", args)
+            results = await message.client.inline_query("@LyBot", args)
             await results[0].click(message.chat_id, hide_via=True)
             await message.delete()
         except Exception as e:
