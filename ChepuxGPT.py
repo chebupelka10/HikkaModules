@@ -8,13 +8,18 @@ import io
 @loader.tds
 class OnlySqAPIMod(loader.Module):
     """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @chepuxcat, основанный на OnlySq api."""
-    strings = {"name": "OnlySqAPI"}
+    strings = {
+        "name": "OnlySqAPI",
+        "GPT_MODEL_CFG": "Выбор моделей для генерации по умолчанию. Допустимые модели: ChatGPT, gemini, blackbox",
+        "IMG_MODEL_CFG": "Выбор моделей для генерации изображений по умолчанию. Допустимые модели: kandinsky, flux",
+        "18_PLUS_CFG": "Докажите что вам есть 18, поставьте значение True в значении этого конфига",
+    }
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            "IS_18_PLUS", "false", lambda m: self.strings("Докажите что вам есть 18, поставьте значение True в значении этого конфига", m),
-            "GPT_MODEL", "ChatGPT", lambda m: self.strings("Выбор моделей для генерации по умолчанию. Допустимые модели: ChatGPT, gemini, blackbox", m),
-            "IMG_MODEL", "Kandinsky", lambda m: self.strings("Выбор моделей для генерации изображений по умолчанию. Допустимые модели: kandinsky, flux", m),
+            "IS_18_PLUS", "false", lambda m: self.strings("18_PLUS_CFG", m),
+            "GPT_MODEL", "ChatGPT", lambda m: self.strings("GPT_MODEL_CFG", m),
+            "IMG_MODEL", "Kandinsky", lambda m: self.strings("IMG_MODEL_CFG", m),
         )
         self.gpt_models = ["ChatGPT", "Gemini", "Blackbox"]
         self.image_models = ["Kandinsky", "Flux"]
