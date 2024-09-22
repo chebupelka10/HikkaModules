@@ -12,9 +12,9 @@ class OnlySqAPIMod(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            "IS_18_PLUS", False, lambda m: self.strings["name"],
-            "GPT_MODEL", "ChatGPT", lambda m: self.strings["name"],  # Добавлен выбор модели GPT
-            "IMG_MODEL", "Kandinsky", lambda m: self.strings["name"],  # Добавлен выбор модели для изображений
+            "IS_18_PLUS", "false", lambda m: self.strings("Докажите что вам есть 18, поставьте значение True в значении этого конфига", m),
+            "GPT_MODEL", "ChatGPT", lambda m: self.strings("Выбор моделей для генерации по умолчанию. Допустимые модели: ChatGPT, gemini, blackbox", m),
+            "IMG_MODEL", "Kandinsky", lambda m: self.strings("Выбор моделей для генерации изображений по умолчанию. Допустимые модели: kandinsky, flux", m),
         )
         self.gpt_models = ["ChatGPT", "Gemini", "Blackbox"]
         self.image_models = ["Kandinsky", "Flux"]
@@ -33,7 +33,7 @@ class OnlySqAPIMod(loader.Module):
             return None
 
     def _get_image_model_prompt(self, model, prompt, image_count=1):
-        if model == "Kandinsky":
+        if model == "kandinsky":
             return {
                 "model": "kandinsky",
                 "request": {
@@ -41,7 +41,7 @@ class OnlySqAPIMod(loader.Module):
                     "meta": {"image_count": image_count}
                 }
             }
-        elif model == "Flux":
+        elif model == "flux":
             return {
                 "model": "flux",
                 "request": {
