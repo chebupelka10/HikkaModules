@@ -149,7 +149,7 @@ class OnlySqAPIMod(loader.Module):
         """Используйте imaginensfw <запрос> чтобы сгенерировать изображение. Только 18+, вам надо подтвердить что вам 18+"""
 
         if not self.config["IS_18_PLUS"]:
-            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Генерация NSFW контента недоступна. Вы должны подтвердить, что вам 18+ в конфиге. Поставив в IS_18_PLUS значение: True, или написав <code>fcfg chepuxgpt IS_18_PLUS True</code></b>")
+            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Генерация NSFW контента недоступна. Вы должны подтвердить, что вам 18+ в конфиге. Поставив в IS_18_PLUS значение: True, или написав <code>fcfg OnlySqAPI IS_18_PLUS True</code></b>")
             return
         
         request_text = utils.get_args_raw(message)
@@ -195,7 +195,7 @@ class OnlySqAPIMod(loader.Module):
                             await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
 
                     if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> NSFW изображение(-я) готово(-ы)! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}</b>")
+                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> NSFW изображение готово! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}</b>")
                     else:
                         await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
         except Exception as e:
@@ -342,7 +342,7 @@ class OnlySqAPIMod(loader.Module):
                             await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
 
                     if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение(-я) готово(-ы)! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}\nСгенерированно с помощью flux</b>")
+                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение готово! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}\nСгенерированно с помощью flux</b>")
                     else:
                         await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
         except Exception as e:
