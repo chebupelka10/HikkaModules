@@ -220,7 +220,7 @@ class OnlySqAPIMod(loader.Module):
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью ChatGPT...</b>")
         try:
-            response = requests.post('http://api.onlysq.ru/ai/v1', json=prompt)
+            response = requests.post('https://api.onlysq.ru/ai/v1', json=prompt)
             response_json = response.json()
             if 'answer' in response_json:
                 answer = response_json['answer']
@@ -252,7 +252,7 @@ class OnlySqAPIMod(loader.Module):
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью Gemini...</b>")
         try:
-            response = requests.post('http://api.onlysq.ru/ai/v2', json=dictToSend)
+            response = requests.post('https://api.onlysq.ru/ai/v2', json=dictToSend)
             response_json = response.json()
             if 'response' in response_json:
                 answer = response_json['response']
@@ -283,10 +283,10 @@ class OnlySqAPIMod(loader.Module):
 
         await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью Blackbox...</b>")
         try:
-            response = requests.post('http://api.onlysq.ru/ai/v2', json=dictToSend)
+            response = requests.post('https://api.onlysq.ru/ai/v2', json=dictToSend)
             response_json = response.json()
-            if 'response' in response_json:
-                answer = response_json['response']
+            if 'answer' in response_json:
+                answer = response_json['answer']
             elif 'error' in response_json:
                 answer = f"Ошибка API: {response_json['error']}"
             else:
@@ -327,7 +327,7 @@ class OnlySqAPIMod(loader.Module):
             }
 
             async with aiohttp.ClientSession() as session:
-                async with session.post('http://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
                     response.raise_for_status()
                     response_json = await response.json()
 
@@ -379,7 +379,7 @@ class OnlySqAPIMod(loader.Module):
             }
 
             async with aiohttp.ClientSession() as session:
-                async with session.post('http://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
                     response.raise_for_status()
                     response_json = await response.json()
 
