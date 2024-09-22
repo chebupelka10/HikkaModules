@@ -254,8 +254,8 @@ class OnlySqAPIMod(loader.Module):
         try:
             response = requests.post('https://api.onlysq.ru/ai/v2', json=dictToSend)
             response_json = response.json()
-            if 'response' in response_json:
-                answer = response_json['response']
+            if 'answer' in response_json:
+                answer = response_json['answer']
             elif 'error' in response_json:
                 answer = f"Ошибка API: {response_json['error']}"
             else:
