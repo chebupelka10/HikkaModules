@@ -19,10 +19,10 @@ class OnlySqAPIMod(loader.Module):
         self.config = loader.ModuleConfig(
             "IS_18_PLUS", "false", lambda m: self.strings("18_PLUS_CFG", m),
             "GPT_MODEL", "ChatGPT", lambda m: self.strings("GPT_MODEL_CFG", m),
-            "IMG_MODEL", "Kandinsky", lambda m: self.strings("IMG_MODEL_CFG", m),
+            "IMG_MODEL", "kandinsky", lambda m: self.strings("IMG_MODEL_CFG", m),
         )
-        self.gpt_models = ["ChatGPT", "Gemini", "Blackbox"]
-        self.image_models = ["Kandinsky", "Flux"]
+        self.gpt_models = ["ChatGPT", "gemini", "blackbox"]
+        self.image_models = ["kandinsky", "flux"]
 
     async def client_ready(self, client, db):
         self.client = client
@@ -120,7 +120,7 @@ class OnlySqAPIMod(loader.Module):
         image_prompt = self._get_image_model_prompt(selected_image_model, prompt, image_count)
 
         if not image_prompt:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Модель \"{selected_image_model}\" не поддерживается. Выберите одну из доступных моделей: Kandinsky, Flux.</b>")
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Модель \"{selected_image_model}\" не поддерживается. Выберите одну из доступных моделей: kandinsky, flux.</b>")
             return
 
         await utils.answer(message, f"<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение с помощью {selected_image_model}...</b>")
