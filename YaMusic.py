@@ -181,7 +181,7 @@ class YaMusicMod(loader.Module):
             else:
                 await utils.answer(message, f"<emoji document_id=5843952899184398024>🚫</emoji> <b>Произошла ошибка: {e}</b>")
     
-    async def ynowcmd(self, message: Message):
+    async def yanowcmd(self, message: Message):
         """Показывает что вы сейчас слушаете на яндекс музыке."""
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -257,7 +257,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, f"<b>Ошибка получения трека: {e}</b>")
 
 
-    async def ylyricscmd(self, message: Message):
+    async def yalyricscmd(self, message: Message):
         """Показывает текст песни которую вы сейчас слушаете"""
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -300,7 +300,7 @@ class YaMusicMod(loader.Module):
         await utils.answer(message, text)
 
 
-    async def ybiocmd(self, message: Message):
+    async def yabiocmd(self, message: Message):
         """Переключатель показа в био трека."""
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -324,7 +324,7 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["autobiod"])
             self.autobio.stop()
 
-    async def ylikecmd(self, message: Message):
+    async def yalikecmd(self, message: Message):
         """❤ Поставить лайк на трек который вы сейчас слушаете на Яндекс Музыке"""
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
@@ -358,7 +358,7 @@ class YaMusicMod(loader.Module):
             await track.like_async()
             await utils.answer(message, self.strings["liked"])
 
-    async def ydislikecmd(self, message: Message):
+    async def yadislikecmd(self, message: Message):
         """💔 Поставить дизлайк на трек который вы сейчас слушаете на Яндекс Музыке"""
         if not self.config["YandexMusicToken"]:
             await utils.answer(message, self.strings["no_token"])
