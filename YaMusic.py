@@ -19,7 +19,7 @@ logging.getLogger("yandex_music").propagate = False
 @loader.tds
 class YaMusicMod(loader.Module):
     """
-    Модуль для Яндекс.Музыка. Основан на YmNow от vsecoder. Создатель: @RemoveWoman [BETA]
+    Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Создатель: @RemoveWoman [BETA]
     """
     strings = {
         "name": "YaMusic",
@@ -205,7 +205,6 @@ class YaMusicMod(loader.Module):
 
         if not track:
             await utils.answer(message, self.strings["my_wave"])
-            await collecting_msg.delete()
             return
 
         
@@ -244,8 +243,6 @@ class YaMusicMod(loader.Module):
                         if resp.status == 200:
                             await f.write(await resp.read())
 
-            await collecting_msg.delete()
-
             await self.client.send_file(
                 message.chat_id,
                 file_name,
@@ -253,11 +250,10 @@ class YaMusicMod(loader.Module):
                 voice=False,
                 supports_streaming=True
             )
-
+            await collecting_msg.delete()
             os.remove(file_name)
 
         except Exception as e:
-            await collecting_msg.delete()
             await utils.answer(message, f"<b>Ошибка получения трека: {e}</b>")
 
 
