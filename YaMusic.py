@@ -1,4 +1,4 @@
-# meta developer: @chepuxmodules
+# meta developer: @RemoveWoman
 
 import asyncio
 import logging
@@ -19,7 +19,7 @@ logging.getLogger("yandex_music").propagate = False
 @loader.tds
 class YaMusicMod(loader.Module):
     """
-    Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Создатель: @RemoveWoman [BETA]
+    Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Если не работает то перепоставьте лайк на песню, работает только на лайкнутые песни! Создатель: @RemoveWoman [BETA]
     """
     strings = {
         "name": "YaMusic",
