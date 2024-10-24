@@ -1,12 +1,12 @@
-# module by @ccbatep
-# meta developer: @ccbatep
+# meta developer: @RemoveWoman
+
 from .. import loader
 from asyncio import sleep
 
 
 @loader.tds
 class HitlerZigMod(loader.Module):
-    strings = {"name": "hitler ccbatep"}
+    strings = {"name": "hitler"}
 
     @loader.owner
     async def facepalmcmd(self, message):
