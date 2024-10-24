@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-# meta developer: @chepuxmodules
+# meta developer: @RemoveWoman
 
 from .. import loader, utils
 
 @loader.tds
 class EditMod(loader.Module):
-    """Изменяет сообщения в ответе by @y9chebupelka"""
+    """Изменяет сообщения в ответе by @RemoveWoman"""
     strings = {"name": "Edit"}
 
     async def editcmd(self, message):
