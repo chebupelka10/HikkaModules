@@ -1,4 +1,4 @@
-# meta developer: @chepuxmodules
+# meta developer: @RemoveWoman
 
 from .. import loader, utils
 import asyncio
