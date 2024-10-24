@@ -6,7 +6,7 @@ import time
 
 
 class AutoLavhostRestartMod(loader.Module):
-    """Перезагружайте автоматически ваш lavhost by @y9chebupelka"""
+    """Перезагружайте автоматически ваш lavhost by @RemoveWoman"""
     
     strings = {"name": "AutoLavhostRestart",
                "config_error": "<b><emoji document_id=5314591660192046611>❌</emoji> Неверное значение в конфиге. Пожалуйста, установите положительное число часов.</b>",
