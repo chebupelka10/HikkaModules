@@ -1,3 +1,5 @@
+# meta developer: @RemoveWoman
+
 import requests
 import asyncio
 from telethon import functions, types
@@ -7,7 +9,7 @@ import io
 
 @loader.tds
 class OnlySqAPIMod(loader.Module):
-    """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @chepuxcat, основанный на OnlySq api."""
+    """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @RemoveWoman, основанный на OnlySq api."""
     strings = {
         "name": "OnlySqAPI",
         "GPT_MODEL_CFG": "Выбор моделей для генерации по умолчанию. Допустимые модели: ChatGPT, gemini, blackbox",
