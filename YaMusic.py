@@ -160,7 +160,7 @@ class YaMusicMod(loader.Module):
     async def yafindcmd(self, message: Message):
         """Ищет трек по названию."""
         args = utils.get_args_raw(message)
-    
+
         if not args:
             reply = await message.get_reply_message()
             if reply:
@@ -168,18 +168,23 @@ class YaMusicMod(loader.Module):
             else:
                 await utils.answer(message, "<emoji document_id=5843952899184398024>🚫</emoji> <b>Вы не указали название песни</b>")
                 return
-    
+
         await utils.answer(message, "<emoji document_id=5463424079568584767>🎧</emoji> <b>Ищу трек на Яндекс.Музыке</b>")
-    
+
         try:
             results = await message.client.inline_query("@LyBot", args)
-            await results[0].click(message.chat_id, hide_via=True)
+            await results[0].click(
+                message.chat_id,
+                hide_via=True,
+                reply_to=message.reply_to_msg_id if message.reply_to_msg_id else None
+            )
             await message.delete()
         except Exception as e:
             if "The bot did not answer to the callback query in time" in str(e):
                 await utils.answer(message, "<emoji document_id=5843952899184398024>🚫</emoji> <b>Ошибка, трека не существует.</b>")
             else:
                 await utils.answer(message, f"<emoji document_id=5843952899184398024>🚫</emoji> <b>Произошла ошибка: {e}</b>")
+
     
     async def yanowcmd(self, message: Message):
         """Показывает что вы сейчас слушаете на яндекс музыке."""
@@ -196,10 +201,8 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["no_token"])
             return
 
-        
         track = await self.get_current_track(client)
 
-        
         if not track:
             track = await self.get_last_liked_track(client)
 
@@ -207,22 +210,18 @@ class YaMusicMod(loader.Module):
             await utils.answer(message, self.strings["my_wave"])
             return
 
-        
         artists = ", ".join(track.artists_name())
         title = track.title + (f" ({track.version})" if track.version else "")
         playlist = track.albums[0].title if track.albums else "Нет плейлиста"
 
-        
         try:
             lnk = track.id.split(":")[1]
         except:
             lnk = track.id
         song_link_url = f"https://song.link/ya/{lnk}"
 
-        
         yandex_music_url = f"https://music.yandex.ru/album/{track.albums[0].id}/track/{track.id}"
 
-        
         caption = self.strings["playing"].format(
             utils.escape_html(artists),
             utils.escape_html(title),
@@ -247,6 +246,7 @@ class YaMusicMod(loader.Module):
                 message.chat_id,
                 file_name,
                 caption=caption,
+                reply_to=message.reply_to_msg_id if message.reply_to_msg_id else None,
                 voice=False,
                 supports_streaming=True
             )
@@ -255,6 +255,7 @@ class YaMusicMod(loader.Module):
 
         except Exception as e:
             await utils.answer(message, f"<b>Ошибка получения трека: {e}</b>")
+
 
 
     async def yalyricscmd(self, message: Message):
