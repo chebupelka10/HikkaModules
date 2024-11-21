@@ -21,7 +21,7 @@ class SosaloinatorMod(loader.Module):
         self.tasks = {}
 
     async def voprcmd(self, message):
-        """Вводя это вы соглашаетесь что вас будут ненавидеть все. (если что эта штука в группах используется реплаем на забайченого человека)"""
+        """[текст] Вводя это вы соглашаетесь что вас будут ненавидеть все. (если что эта штука в группах используется реплаем на забайченого человека)"""
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         chat = message.chat_id
