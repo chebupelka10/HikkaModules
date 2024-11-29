@@ -156,7 +156,7 @@ async def get_current_track(client, token):
 
 class YaMusicMod(loader.Module):
     """
-    Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Если не работает то перепоставьте лайк на песню, работает только на лайкнутые песни! Создатель: @RemoveWoman [BETA]
+    Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Теперь работает со всеми треками! Создатель: @RemoveWoman [BETA]
     """
     strings = {
         "name": "YaMusic",
@@ -171,7 +171,7 @@ class YaMusicMod(loader.Module):
         "no_results": "<b><emoji document_id=5285037058220372959>☹️</emoji> Ничего не найдено :(</b>",
         "autobioe": "<b>🔁 Autobio включен</b>",
         "autobiod": "<b>🔁 Autobio выключен</b>",
-        "_cls_doc": "Модуль для Яндекс.Музыка. Основан на YmNow от vsecoder. Создатель: @RemoveWoman [BETA]",
+        "_cls_doc": "Модуль для Яндекс.Музыки. Основан на YmNow от vsecoder. Теперь работает со всеми треками! Создатель: @RemoveWoman [BETA]",
         "already_liked": "<b><emoji document_id=5843952899184398024>🚫</emoji> Текущий трек уже лайкнут!</b>",
         "liked": "<b><emoji document_id=5310109269113186974>❤️</emoji> Лайкнул текущий трек!</b>",
         "not_liked": "<b><emoji document_id=5843952899184398024>🚫</emoji> Текущий трек не лайкнут!</b>",
@@ -501,7 +501,7 @@ class YaMusicMod(loader.Module):
         duration_ms = int(track["duration_ms"])
 
         text = self.config["AutoBioTemplate"].format(
-            f"{', '.join(artists)} - {title} | {duration_ms // 1000 // 60:02}:{duration_ms // 1000 % 60:02}",
+            f"{', '.join(artists)} - {title}"
         )
 
         try:
