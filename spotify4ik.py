@@ -393,11 +393,16 @@ class Spotify4ik(loader.Module):
         if not self.config['auth_token']:
             return
 
+        scope1 = (
+            "user-read-playback-state playlist-read-private playlist-read-collaborative"
+            " app-remote-control user-modify-playback-state user-library-modify"
+            " user-library-read"
+        )
         sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id=self.config['client_id'],
-            client_secret=self.config['client_secret'],
-            redirect_uri="https://sp.fajox.one",
-            scope="user-read-playback-state"
+            client_id="e0708753ab60499c89ce263de9b4f57a",
+            client_secret="80c927166c664ee98a43a2c0e2981b4a",
+            redirect_uri="https://thefsch.github.io/spotify/",
+            scope=scope1
         )
 
         try:
