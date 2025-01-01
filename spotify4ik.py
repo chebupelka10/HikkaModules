@@ -88,13 +88,13 @@ class Spotify4ik(loader.Module):
     async def client_ready(self, client, db):
         self.db = db
         self._client = client
-        self._premium = getattr(await self.client.get_me(), "premium", False)
 
         if self.config['bio_change']:
             asyncio.create_task(self._update_bio())
 
     async def _update_bio(self):
         while True:
+            self._premium = getattr(await self.client.get_me(), "premium", False)
             if not self.db.get(self.name, "bio_change", False):
                 break
             sp = spotipy.Spotify(auth=self.config['auth_token'])
