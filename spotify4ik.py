@@ -64,6 +64,18 @@ class Spotify4ik(loader.Module):
                 lambda: "Текст био с текущим треком",
             ),
         )
+        self.sp = None
+        self.sp_auth = spotipy.oauth2.SpotifyOAuth(
+            client_id="e0708753ab60499c89ce263de9b4f57a",
+            client_secret="80c927166c664ee98a43a2c0e2981b4a",
+            redirect_uri="https://thefsch.github.io/spotify/",
+            scope=(
+                "user-read-playback-state playlist-read-private playlist-read-collaborative "
+                "app-remote-control user-modify-playback-state user-library-modify user-library-read"
+            ),
+        )
+        self.auth_token = None
+        self.refresh_token = None
 
     async def client_ready(self, client, db):
         self.db = db
@@ -77,6 +89,7 @@ class Spotify4ik(loader.Module):
             self._premium = getattr(await self.client.get_me(), "premium", False)
             if not self.db.get(self.name, "bio_change", False):
                 break
+            self.config['auth_token'] = self.auth_token
             sp = spotipy.Spotify(auth=self.config['auth_token'])
             try:
                 current_playback = sp.current_playback()
@@ -92,59 +105,37 @@ class Spotify4ik(loader.Module):
 
     @loader.command()
     async def sauth(self, message):
-        """Войти в свой аккаунт"""
-        scope1 = (
-            "user-read-playback-state playlist-read-private playlist-read-collaborative"
-            " app-remote-control user-modify-playback-state user-library-modify"
-            " user-library-read"
-        )
-        sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id="e0708753ab60499c89ce263de9b4f57a",
-            client_secret="80c927166c664ee98a43a2c0e2981b4a",
-            redirect_uri="https://thefsch.github.io/spotify/",
-            scope=scope1
-        )
-
-        auth_url = sp_oauth.get_authorize_url()
-
+        """Authenticate your Spotify account."""
+        auth_url = self.sp_auth.get_authorize_url()
         await utils.answer(message, self.strings['go_auth_link'].format(auth_url, self.get_prefix()))
 
     @loader.command()
     async def scode(self, message):
-        """Ввести код авторизации"""
+        """Enter the authorization code."""
         code = utils.get_args_raw(message)
         if not code:
             return await utils.answer(message, self.strings['no_code'].format(self.get_prefix()))
+
         if code.startswith("https://thefsch.github.io/spotify/?code="):
             code = code.replace("https://thefsch.github.io/spotify/?code=", "")
-        scope1 = (
-            "user-read-playback-state playlist-read-private playlist-read-collaborative"
-            " app-remote-control user-modify-playback-state user-library-modify"
-            " user-library-read"
-        )
-        sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id="e0708753ab60499c89ce263de9b4f57a",
-            client_secret="80c927166c664ee98a43a2c0e2981b4a",
-            redirect_uri="https://thefsch.github.io/spotify/",
-            scope=scope1
-        )
-
-        token_info = sp_oauth.get_access_token(code)
-        self.config['auth_token'] = token_info['access_token']
 
         try:
-            sp = spotipy.Spotify(auth=token_info['access_token'])
-            current_playback = sp.current_playback()
-        except spotipy.oauth2.SpotifyOauthError as e:
-            return await utils.answer(message, self.strings['auth_error'].format(str(e)))
-        except Exception as e:
-            return await utils.answer(message, self.strings['unexpected_error'].format(str(e)))
+            token_info = self.sp_auth.get_access_token(code)
+            self.auth_token = token_info['access_token']
+            self.refresh_token = token_info['refresh_token']
+            self.sp = spotipy.Spotify(auth=self.auth_token)
+            asyncio.create_task(self.refresh_token_loop())
 
-        await utils.answer(message, self.strings['code_installed'])
+            await utils.answer(message, self.strings['code_installed'])
+        except Exception as e:
+            logger.error("Authorization error", exc_info=True)
+            await utils.answer(message, self.strings['auth_error'].format(str(e)))
+
 
     @loader.command()
     async def spause(self, message):
         """⏸️ Поставить на паузу текущий трек"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -167,6 +158,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def splay(self, message):
         """🎶 Воспроизвести текущий трек"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -189,6 +181,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def slike(self, message):
         """❤️ Добавить текущий трек в избранное"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -225,6 +218,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def snext(self, message):
         """➡️ Включить следующий трек"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -247,6 +241,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def sback(self, message):
         """⏮ Вернуться к предыдущему треку"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -265,6 +260,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def sbegin(self, message):
         """⏪ Включить текущий трек с начала"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -287,6 +283,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def sbio(self, message):
         """✏️ Включить/выключить стрим текущего трека в био"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -301,6 +298,7 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def snow(self, message):
         """🎧 Показывает что вы слушаете на Spotify"""
+        self.config['auth_token'] = self.auth_token
         if not self.config['auth_token']:
             return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
 
@@ -388,25 +386,23 @@ class Spotify4ik(loader.Module):
                 return await utils.answer(message, self.strings['no_song_playing'])
             return await utils.answer(message, self.strings['unexpected_error'].format(str(e)))
 
-    @loader.loop(interval=60*40, autostart=True)
+    async def refresh_token_loop(self):
+        while True:
+            if not self.auth_token:
+                await asyncio.sleep(60)
+                continue
+
+            try:
+                token_info = self.sp_auth.refresh_access_token(self.refresh_token)
+                self.auth_token = token_info['access_token']
+                self.refresh_token = token_info['refresh_token']
+                self.sp = spotipy.Spotify(auth=self.auth_token)
+            except Exception as e:
+                logger.error("Failed to refresh Spotify token", exc_info=True)
+
+            await asyncio.sleep(45 * 60)
+
+    @loader.loop(interval=60 * 40, autostart=True)
     async def loop(self):
-        if not self.config['auth_token']:
+        if not self.auth_token:
             return
-
-        scope1 = (
-            "user-read-playback-state playlist-read-private playlist-read-collaborative"
-            " app-remote-control user-modify-playback-state user-library-modify"
-            " user-library-read"
-        )
-        sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id="e0708753ab60499c89ce263de9b4f57a",
-            client_secret="80c927166c664ee98a43a2c0e2981b4a",
-            redirect_uri="https://thefsch.github.io/spotify/",
-            scope=scope1
-        )
-
-        try:
-            token_info = sp_oauth.refresh_access_token(self.config['auth_token'])
-            self.config['auth_token'] = token_info['access_token']
-        except:
-            logger.error("Failed to refresh Spotify token", exc_info=True)
