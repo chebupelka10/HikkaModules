@@ -27,15 +27,7 @@ class Spotify4ik(loader.Module):
         
 🔐 Перейди по <a href='{}'>этой ссылке</a>.
         
-✏️ Потом введи: <code>{}scode полученная ссылка</code></b>""",
-
-        "need_client_tokens": """<emoji document_id=5472308992514464048>🔐</emoji> <b>Создай приложение по <a href="https://developer.spotify.com/dashboard">этой ссылке</a></b>
-
-<emoji document_id=5467890025217661107>‼️</emoji> <b>Важно:</b> redirect_url приложения должен быть <code>https://sp.fajox.one</code>
-        
-<b><emoji document_id=5330115548900501467>🔑</emoji> Заполни <code>client_id</code> и <code>client_secret</code> в <code>{}cfg Spotify4ik</code></b>
-
-<b><emoji document_id=5431376038628171216>💻</emoji> И снова напиши <code>{}spauth</code></b>""",
+✏️ Потом введи: <code>{}scode полученная_ссылка</code></b>""",
 
         "no_auth_token": "<emoji document_id=5854929766146118183>❌</emoji> <b>Авторизуйся в свой аккаунт через <code>{}sauth</code></b>",
         "no_song_playing": "<emoji document_id=5854929766146118183>❌</emoji> <b>Сейчас ничего не играет.</b>",
@@ -101,9 +93,6 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def sauth(self, message):
         """Войти в свой аккаунт"""
-        if not self.config['client_id'] or not self.config['client_secret']:
-            return await utils.answer(message, self.strings['need_client_tokens'].format(self.get_prefix(), self.get_prefix()))
-
         scope1 = (
             "user-read-playback-state playlist-read-private playlist-read-collaborative"
             " app-remote-control user-modify-playback-state user-library-modify"
@@ -123,13 +112,11 @@ class Spotify4ik(loader.Module):
     @loader.command()
     async def scode(self, message):
         """Ввести код авторизации"""
-        if not self.config['client_id'] or not self.config['client_secret']:
-            return await utils.answer(message, self.strings['need_client_tokens'].format(self.get_prefix()))
         code = utils.get_args_raw(message)
         if not code:
             return await utils.answer(message, self.strings['no_code'].format(self.get_prefix()))
-        if "code=" in code:
-            code = code.split("code=")[1].split("&")[0]
+        if code.startswith("https://thefsch.github.io/spotify/?code="):
+            code = code.replace("https://thefsch.github.io/spotify/?code=", "")
         scope1 = (
             "user-read-playback-state playlist-read-private playlist-read-collaborative"
             " app-remote-control user-modify-playback-state user-library-modify"
