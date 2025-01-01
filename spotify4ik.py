@@ -27,7 +27,7 @@ class Spotify4ik(loader.Module):
         
 🔐 Перейди по <a href='{}'>этой ссылке</a>.
         
-✏️ Потом введи: <code>{}spcode свой_auth_token</code></b>""",
+✏️ Потом введи: <code>{}scode полученная ссылка</code></b>""",
 
         "need_client_tokens": """<emoji document_id=5472308992514464048>🔐</emoji> <b>Создай приложение по <a href="https://developer.spotify.com/dashboard">этой ссылке</a></b>
 
@@ -37,9 +37,9 @@ class Spotify4ik(loader.Module):
 
 <b><emoji document_id=5431376038628171216>💻</emoji> И снова напиши <code>{}spauth</code></b>""",
 
-        "no_auth_token": "<emoji document_id=5854929766146118183>❌</emoji> <b>Авторизуйся в свой аккаунт через <code>{}spauth</code></b>",
+        "no_auth_token": "<emoji document_id=5854929766146118183>❌</emoji> <b>Авторизуйся в свой аккаунт через <code>{}sauth</code></b>",
         "no_song_playing": "<emoji document_id=5854929766146118183>❌</emoji> <b>Сейчас ничего не играет.</b>",
-        "no_code": "<emoji document_id=5854929766146118183>❌</emoji> <b>Должно быть <code>{}spcode код_авторизации</code></b>",
+        "no_code": "<emoji document_id=5854929766146118183>❌</emoji> <b>Должно быть <code>{}scode полученная ссылка</code></b>",
         "code_installed": """<b><emoji document_id=5330115548900501467>🔑</emoji> Код авторизации установлен!</b>
         
 <emoji document_id=5870794890006237381>🎶</emoji> <b>Наслаждайся музыкой!</b>""",
@@ -60,18 +60,6 @@ class Spotify4ik(loader.Module):
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            loader.ConfigValue(
-                "client_id",
-                None,
-                lambda: "Айди приложения, Получить: https://developer.spotify.com/dashboard",
-                validator=loader.validators.Hidden(loader.validators.String()),
-            ),
-            loader.ConfigValue(
-                "client_secret",
-                None,
-                lambda: "Секретный ключ приложения, Получить: https://developer.spotify.com/dashboard",
-                validator=loader.validators.Hidden(loader.validators.String()),
-            ),
             loader.ConfigValue(
                 "auth_token",
                 None,
@@ -111,16 +99,21 @@ class Spotify4ik(loader.Module):
             await asyncio.sleep(90)
 
     @loader.command()
-    async def spauth(self, message):
+    async def sauth(self, message):
         """Войти в свой аккаунт"""
         if not self.config['client_id'] or not self.config['client_secret']:
             return await utils.answer(message, self.strings['need_client_tokens'].format(self.get_prefix(), self.get_prefix()))
 
+        scope1 = (
+            "user-read-playback-state playlist-read-private playlist-read-collaborative"
+            " app-remote-control user-modify-playback-state user-library-modify"
+            " user-library-read"
+        )
         sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id=self.config['client_id'],
-            client_secret=self.config['client_secret'],
-            redirect_uri="https://sp.fajox.one",
-            scope="user-read-playback-state"
+            client_id="e0708753ab60499c89ce263de9b4f57a",
+            client_secret="80c927166c664ee98a43a2c0e2981b4a",
+            redirect_uri="https://thefsch.github.io/spotify/",
+            scope=scope1
         )
 
         auth_url = sp_oauth.get_authorize_url()
@@ -128,19 +121,25 @@ class Spotify4ik(loader.Module):
         await utils.answer(message, self.strings['go_auth_link'].format(auth_url, self.get_prefix()))
 
     @loader.command()
-    async def spcode(self, message):
+    async def scode(self, message):
         """Ввести код авторизации"""
         if not self.config['client_id'] or not self.config['client_secret']:
             return await utils.answer(message, self.strings['need_client_tokens'].format(self.get_prefix()))
         code = utils.get_args_raw(message)
         if not code:
             return await utils.answer(message, self.strings['no_code'].format(self.get_prefix()))
-
+        if "code=" in code:
+            code = code.split("code=")[1].split("&")[0]
+        scope1 = (
+            "user-read-playback-state playlist-read-private playlist-read-collaborative"
+            " app-remote-control user-modify-playback-state user-library-modify"
+            " user-library-read"
+        )
         sp_oauth = spotipy.oauth2.SpotifyOAuth(
-            client_id=self.config['client_id'],
-            client_secret=self.config['client_secret'],
-            redirect_uri="https://sp.fajox.one",
-            scope="user-read-playback-state"
+            client_id="e0708753ab60499c89ce263de9b4f57a",
+            client_secret="80c927166c664ee98a43a2c0e2981b4a",
+            redirect_uri="https://thefsch.github.io/spotify/",
+            scope=scope1
         )
 
         token_info = sp_oauth.get_access_token(code)
