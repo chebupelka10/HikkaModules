@@ -88,6 +88,7 @@ class Spotify4ik(loader.Module):
     async def client_ready(self, client, db):
         self.db = db
         self._client = client
+        self._premium = getattr(await self.client.get_me(), "premium", False)
 
         if self.config['bio_change']:
             asyncio.create_task(self._update_bio())
@@ -104,7 +105,7 @@ class Spotify4ik(loader.Module):
                     track_name = track.get('name', 'Unknown Track')
                     artist_name = track['artists'][0].get('name', 'Unknown Artist')
                     bio = self.config['bio_text'].format(track_name=track_name, artist_name=artist_name)
-                    await self._client(UpdateProfileRequest(about=bio[:70]))
+                    await self._client(UpdateProfileRequest(about=bio[:140 if self._premium else 70]))
             except Exception as e:
                 logger.error(f"Error updating bio: {e}")
             await asyncio.sleep(90)
