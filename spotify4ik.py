@@ -50,7 +50,7 @@ class Spotify4ik(loader.Module):
         "track_pause": "<b><emoji document_id=6334755820168808080>⏸️</emoji> Трек поставлен на паузу.</b>",
         "track_play": "<b><emoji document_id=5188621441926438751>🎵</emoji> Играю...</b>",
 
-        "track_loading": "<emoji document_id=5348240937954851856>🎧</emoji> <b>Загружаю трек...</b>",
+        "track_loading": "<emoji document_id=5294137402430858861>🎵</emoji> <b>Скачиваем трек, почти готово!</b>",
 
         "music_bio_disabled": "<b><emoji document_id=5334673106202010226>✏️</emoji> Стрим музыки в био выключен</b>",
         "music_bio_enabled": "<b><emoji document_id=5334673106202010226>✏️</emoji> Стрим музыки в био включен</b>",
@@ -350,7 +350,6 @@ class Spotify4ik(loader.Module):
             playlist_url = f"https://open.spotify.com/playlist/{playlist}" if playlist else None
 
             track_info = (
-                f"<b>🎧 Now Playing</b>\n\n"
                 f"<b><emoji document_id=5188705588925702510>🎶</emoji> {track_name} - <code>{artist_name}</code>\n"
                 f"<b><emoji document_id=5870794890006237381>💿</emoji> Album:</b> <code>{album_name}</code>\n\n"
                 f"<b><emoji document_id=6007938409857815902>🎧</emoji> Device:</b> <code>{device_name}</code>\n"
