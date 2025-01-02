@@ -76,43 +76,48 @@ class Spotify4ik(loader.Module):
         )
         self.auth_token = None
         self.refresh_token = None
+        self._bio_task = None
 
     async def client_ready(self, client, db):
         self.db = db
         self._client = client
-        self.auth_token = self.config['auth_token']
+        self.auth_token = self.config["auth_token"]
 
-        if self.config['bio_change']:
-            asyncio.create_task(self._update_bio())
+        if self.db.get(self.name, "bio_change", False):
+            self._bio_task = asyncio.create_task(self._update_bio())
 
     async def _update_bio(self):
         while True:
-            self._premium = getattr(await self.client.get_me(), "premium", False)
-            if not self.db.get(self.name, "bio_change", False):
-                break
-            self.config['auth_token'] = self.auth_token
-            sp = spotipy.Spotify(auth=self.config['auth_token'])
             try:
+                if not self.db.get(self.name, "bio_change", False):
+                    break
+
+                self.auth_token = self.config["auth_token"]
+                sp = spotipy.Spotify(auth=self.auth_token)
                 current_playback = sp.current_playback()
-                if current_playback and current_playback.get('item'):
-                    track = current_playback['item']
-                    track_name = track.get('name', 'Unknown Track')
-                    artist_name = track['artists'][0].get('name', 'Unknown Artist')
-                    bio = self.config['bio_text'].format(track_name=track_name, artist_name=artist_name)
-                    await self._client(UpdateProfileRequest(about=bio[:140 if self._premium else 70]))
+
+                if current_playback and current_playback.get("item"):
+                    track = current_playback["item"]
+                    track_name = track.get("name", "Unknown Track")
+                    artist_name = track["artists"][0].get("name", "Unknown Artist")
+                    bio = self.config["bio_text"].format(track_name=track_name, artist_name=artist_name)
+
+                    premium = getattr(await self._client.get_me(), "premium", False)
+                    await self._client(UpdateProfileRequest(about=bio[:140 if premium else 70]))
             except Exception as e:
                 logger.error(f"Error updating bio: {e}")
+
             await asyncio.sleep(90)
 
     @loader.command()
     async def sauth(self, message):
-        """Authenticate your Spotify account."""
+        """Получить ссылку для входа в аккаунт"""
         auth_url = self.sp_auth.get_authorize_url()
         await utils.answer(message, self.strings['go_auth_link'].format(auth_url, self.get_prefix()))
 
     @loader.command()
     async def scode(self, message):
-        """Enter the authorization code."""
+        """Ввести код авторизации"""
         code = utils.get_args_raw(message)
         if not code:
             return await utils.answer(message, self.strings['no_code'].format(self.get_prefix()))
@@ -280,21 +285,23 @@ class Spotify4ik(loader.Module):
 
         except Exception as e:
             await utils.answer(message, self.strings['unexpected_error'].format(e))
-
     @loader.command()
     async def sbio(self, message):
         """✏️ Включить/выключить стрим текущего трека в био"""
-        self.config['auth_token'] = self.auth_token
-        if not self.config['auth_token']:
-            return await utils.answer(message, self.strings['no_auth_token'].format(self.get_prefix()))
+        self.auth_token = self.config["auth_token"]
+        if not self.auth_token:
+            return await utils.answer(message, self.strings["no_auth_token"].format(self.get_prefix()))
 
         if self.db.get(self.name, "bio_change", False):
-            self.db.set(self.name, 'bio_change', False)
-            return await utils.answer(message, self.strings['music_bio_disabled'])
+            self.db.set(self.name, "bio_change", False)
+            if self._bio_task:
+                self._bio_task.cancel()
+                self._bio_task = None
+            return await utils.answer(message, self.strings["music_bio_disabled"])
 
-        self.db.set(self.name, 'bio_change', True)
+        self.db.set(self.name, "bio_change", True)
         self._bio_task = asyncio.create_task(self._update_bio())
-        await utils.answer(message, self.strings['music_bio_enabled'])
+        await utils.answer(message, self.strings["music_bio_enabled"])
         
     @loader.command()
     async def snow(self, message):
