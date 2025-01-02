@@ -75,6 +75,7 @@ class Spotify4ik(loader.Module):
             ),
         )
         self.auth_token = None
+        self.auth_token = self.config['auth_token']
         self.refresh_token = None
 
     async def client_ready(self, client, db):
