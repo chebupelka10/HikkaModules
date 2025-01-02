@@ -75,12 +75,12 @@ class Spotify4ik(loader.Module):
             ),
         )
         self.auth_token = None
-        self.auth_token = self.config['auth_token']
         self.refresh_token = None
 
     async def client_ready(self, client, db):
         self.db = db
         self._client = client
+        self.auth_token = self.config['auth_token']
 
         if self.config['bio_change']:
             asyncio.create_task(self._update_bio())
