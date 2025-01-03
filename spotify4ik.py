@@ -83,7 +83,7 @@ class Spotify4ik(loader.Module):
 
         if self.db.get(self.name, "bio_change", False):
             self._bio_task = asyncio.create_task(self._update_bio())
-        asyncio.create_task(self.refresh_token_loop())
+        await self.refresh_token_loop()
 
     async def _update_bio(self):
         while True:
@@ -103,6 +103,10 @@ class Spotify4ik(loader.Module):
 
                     premium = getattr(await self._client.get_me(), "premium", False)
                     await self._client(UpdateProfileRequest(about=bio[:140 if premium else 70]))
+            except spotipy.oauth2.SpotifyOauthError as e:
+                if "The access token expired" in str(e):
+                    await self.refresh_auth_token()
+                    continue
             except Exception as e:
                 logger.error(f"Error updating bio: {e}")
 
