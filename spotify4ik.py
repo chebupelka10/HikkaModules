@@ -83,6 +83,7 @@ class Spotify4ik(loader.Module):
 
         if self.db.get(self.name, "bio_change", False):
             self._bio_task = asyncio.create_task(self._update_bio())
+        asyncio.create_task(self.refresh_token_loop())
 
     async def _update_bio(self):
         while True:
