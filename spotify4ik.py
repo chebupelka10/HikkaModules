@@ -91,8 +91,8 @@ class Spotify4ik(loader.Module):
                 if not self.db.get(self.name, "bio_change", False):
                     break
 
-                self.auth_token = self.config["auth_token"]
-                sp = spotipy.Spotify(auth=self.auth_token)
+                self.config['auth_token'] = self.auth_token
+                sp = spotipy.Spotify(auth=self.config['auth_token'])
                 current_playback = sp.current_playback()
 
                 if current_playback and current_playback.get("item"):
