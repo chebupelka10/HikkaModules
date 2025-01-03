@@ -400,6 +400,7 @@ class Spotify4ik(loader.Module):
             try:
                 token_info = self.sp_auth.refresh_access_token(self.refresh_token)
                 self.auth_token = token_info['access_token']
+                self.config['auth_token'] = self.auth_token
                 self.refresh_token = token_info['refresh_token']
                 self.sp = spotipy.Spotify(auth=self.auth_token)
             except Exception as e:
