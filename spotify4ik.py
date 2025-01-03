@@ -78,16 +78,19 @@ class Spotify4ik(loader.Module):
         self.refresh_token = None
         self._bio_task = None
 
-    async def client_ready(self, client, db):
-        self.db = db
-        self._client = client
-        self.auth_token = self.config["auth_token"]
+async def client_ready(self, client, db):
+    self.db = db
+    self._client = client
+    self.auth_token = self.config["auth_token"]
 
-        if not self.auth_token:
-            logger.warning("Auth token is missing. Spotify functionality may not work correctly.")
+    if not self.auth_token:
+        logger.warning("Auth token is missing. Spotify functionality may not work correctly.")
 
-        if self.db.get(self.name, "bio_change", False):
-            self._bio_task = asyncio.create_task(self._update_bio())
+    if self.db.get(self.name, "bio_change", False):
+        self._bio_task = asyncio.create_task(self._update_bio())
+
+    self._token_refresh_task = asyncio.create_task(self.refresh_auth_token())
+
 
     async def _update_bio(self):
         while True:
@@ -401,24 +404,26 @@ class Spotify4ik(loader.Module):
                 return await utils.answer(message, self.strings['no_song_playing'])
             return await utils.answer(message, self.strings['unexpected_error'].format(str(e)))
 
-@loader.loop(interval=45 * 60, autostart=True)
-async def loop(self):
+async def refresh_auth_token(self):
     while not self.auth_token:
         logger.warning("Auth token is missing. Waiting for 1 minute before retrying.")
         await asyncio.sleep(60)
 
-    try:
-        logger.info("Refreshing Spotify token in loop...")
-        
-        token_info = self.sp_auth.refresh_access_token(self.auth_token)
+    while True:
+        try:
+            logger.info("Refreshing Spotify token in loop...")
+            token_info = self.sp_auth.refresh_access_token(self.auth_token)
+            self.auth_token = token_info.get('access_token')
 
-        self.auth_token = token_info.get('access_token')
+            if not self.auth_token:
+                logger.error("Failed to refresh token: No access token returned")
+                await asyncio.sleep(60)
+                continue
 
-        if not self.auth_token:
-            logger.error("Failed to refresh token: No access token returned")
-            return
+            self.sp = spotipy.Spotify(auth=self.auth_token)
+            logger.info("Spotify token refreshed successfully")
+            await asyncio.sleep(45 * 60)
 
-        self.sp = spotipy.Spotify(auth=self.auth_token)
-        logger.info("Spotify token refreshed successfully")
-    except Exception as e:
-        logger.error("Failed to refresh Spotify token", exc_info=True)
+        except Exception as e:
+            logger.error("Failed to refresh Spotify token", exc_info=True)
+            await asyncio.sleep(60)
