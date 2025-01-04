@@ -100,7 +100,7 @@ class Spotify4ikMod(loader.Module):
             "<emoji document_id=5312526098750252863>🚫</emoji> <b>Нет результатов</b>"
         ),
         "playing_track": (
-            "<emoji document_id=5212941939053175244>🎧</emoji> <b>{} добавлен в"
+            "<emoji document_id=5294137402430858861>🎵</emoji> <b>{} добавлен в"
             " очередь</b>"
         ),
         "no_music": (
