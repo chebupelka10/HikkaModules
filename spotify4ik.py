@@ -696,7 +696,7 @@ class Spotify4ikMod(loader.Module):
             icon = (
                 "<emoji document_id=5431376038628171216>💻</emoji>"
                 if "computer" in str(device)
-                else "<emoji document_id=5407025283456835913>📱</emoji>"
+                else "<emoji document_id=5872980989705196227>📱</emoji>"
             )
             result += (
                 "\n\n<emoji document_id=5877307202888273539>📁</emoji>"
@@ -723,7 +723,7 @@ class Spotify4ikMod(loader.Module):
             )
             if universal_link:
                 result += (
-                    f"\n<emoji document_id=5902449142575141204>🔗</emoji> <b><a href='{universal_link}'>Открыть на song.link</a></b>"
+                    f"\n<emoji document_id=5877465816030515018>🔗</emoji> <b><a href='{universal_link}'>Открыть на song.link</a></b>"
                 )
 
         except Exception:
