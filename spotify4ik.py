@@ -107,7 +107,7 @@ class Spotify4ikMod(loader.Module):
             "<emoji document_id=5312526098750252863>🚫</emoji> <b>Музыка не играет!</b>"
         ),
         "searching": (
-            "<emoji document_id=5188311512791393083>🔎</emoji> <b>Ищу трек, почти готово!</b>"
+            "<emoji document_id=5188311512791393083>🔎</emoji> <b>Ищу трек на Spotify, почти готово!</b>"
         ),
         "currently_on": "Сейчас слушаю на",
         "playlist": "Плейлист",
@@ -438,7 +438,7 @@ class Spotify4ikMod(loader.Module):
                 await self._client.send_file(
                     message.chat_id,
                     audio_path,
-                    caption=f"<b>{track_name}</b> by <b>{artist_name}</b>",
+                    caption=f"<b><emoji document_id=5188705588925702510>🎶</emoji> {track_name}</b> - <b>{artist_name}</b>",
                     attributes=[
                         types.DocumentAttributeAudio(
                             duration=track["duration_ms"] // 1000,
