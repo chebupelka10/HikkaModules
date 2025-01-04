@@ -109,7 +109,7 @@ class Spotify4ikMod(loader.Module):
         "searching": (
             "<emoji document_id=5188311512791393083>🔎</emoji> <b>Ищу трек на Spotify, почти готово!</b>"
         ),
-        "currently_on": "Сейчас слушаю на",
+        "currently_on": "Cлушаю на",
         "playlist": "Плейлист",
         "owner": "Владелец",
         "quality": "Качество",
@@ -699,22 +699,22 @@ class Spotify4ikMod(loader.Module):
                 else "<emoji document_id=5407025283456835913>📱</emoji>"
             )
             result += (
-                f"\n\n{icon} <b>{self.strings('currently_on')}</b>"
-                f" <code>{device}</code>"
-                if device
-                else ""
-            )
-            result += (
-                "\n<emoji document_id=5944809881029578897>📁</emoji>"
+                "\n\n<emoji document_id=5877307202888273539>📁</emoji>"
                 f" <b>{self.strings('playlist')}</b>: <a"
                 f' href="https://open.spotify.com/playlist/{playlist_id}">{playlist_name}</a>'
                 if playlist_name and playlist_id
                 else ""
             )
             result += (
-                "\n<emoji document_id=5467406098367521267>👑</emoji>"
+                "\n<emoji document_id=5879770735999717115>👤</emoji>"
                 f" <b>{self.strings('owner')}</b>: {playlist_owner}"
                 if playlist_owner
+                else ""
+            )
+            result += (
+                f"\n\n{icon} <b>{self.strings('currently_on')}</b>"
+                f" <code>{device}</code>"
+                if device
                 else ""
             )
             result += (
