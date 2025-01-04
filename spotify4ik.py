@@ -624,6 +624,7 @@ class Spotify4ikMod(loader.Module):
     @tokenized
     async def snowcmd(self, message: Message):
         """🎧 Просмотреть карточку текущего трека."""
+        await utils.answer(message, "<emoji document_id=5294137402430858861>🎵</emoji> <b>Погружаюсь в Spotify, чтобы найти, что играет прямо сейчас...</b>")
         current_playback = self.sp.current_playback()
         try:
             device = (
@@ -633,8 +634,6 @@ class Spotify4ikMod(loader.Module):
             )
         except Exception:
             device = None
-
-        await utils.answer(message, "<emoji document_id=5294137402430858861>🎵</emoji> <b>Погружаюсь в Spotify, чтобы найти, что играет прямо сейчас...</b>")
 
         try:
             playlist_id = current_playback["context"]["uri"].split(":")[-1]
@@ -665,19 +664,8 @@ class Spotify4ikMod(loader.Module):
             .get("external_urls", {})
             .get("spotify", None)
         )
-        if track_url:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(f"https://api.song.link/v1-alpha.1/links?url={track_url}") as response:
-                        if response.status == 200:
-                            songlink_data = await response.json()
-                            universal_link = songlink_data.get("pageUrl", None)
-                        else:
-                            universal_link = None
-            except Exception as e:
-                universal_link = None
-        else:
-            universal_link = None
+        universal_link = f"https://song.link/s/{track_id}"
+
 
         artists = [
             artist["name"]
