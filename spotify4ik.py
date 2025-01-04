@@ -694,7 +694,7 @@ class Spotify4ikMod(loader.Module):
                 result += f"\n<emoji document_id=5872756762347573066>🕒</emoji> <b>Длина трека: {minutes}:{seconds:02}</b>"
             
             icon = (
-                "<emoji document_id=5431376038628171216>💻</emoji>"
+                "<emoji document_id=5967816500415827773>💻</emoji>"
                 if "computer" in str(device)
                 else "<emoji document_id=5872980989705196227>📱</emoji>"
             )
