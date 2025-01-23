@@ -1,7 +1,5 @@
-# meta developer: @RemoveWoman
+# meta developer: @OnlySq
 
-import requests
-import asyncio
 from telethon import functions, types
 from .. import loader, utils
 import aiohttp
@@ -9,208 +7,27 @@ import io
 
 @loader.tds
 class OnlySqAPIMod(loader.Module):
-    """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @RemoveWoman, основанный на OnlySq api."""
+    """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @MiSidePlayer, основанный на OnlySq api. Пока в onlysq не работает генерация изображений, и она была временно удалена из модуля. Пишите об идеях MiSidePlayer"""
     strings = {
-        "name": "OnlySqAPI",
-        "GPT_MODEL_CFG": "Выбор моделей для генерации по умолчанию. Допустимые модели: ChatGPT, gemini, blackbox",
-        "IMG_MODEL_CFG": "Выбор моделей для генерации изображений по умолчанию. Допустимые модели: kandinsky, flux",
-        "18_PLUS_CFG": "Докажите что вам есть 18, поставьте значение True в значении этого конфига",
+        "name": "OnlySqAPI"
     }
-
-    def __init__(self):
-        self.config = loader.ModuleConfig(
-            "IS_18_PLUS", "false", lambda m: self.strings("18_PLUS_CFG", m),
-            "GPT_MODEL", "ChatGPT", lambda m: self.strings("GPT_MODEL_CFG", m),
-            "IMG_MODEL", "kandinsky", lambda m: self.strings("IMG_MODEL_CFG", m),
-        )
-        self.gpt_models = ["ChatGPT", "gemini", "blackbox"]
-        self.image_models = ["kandinsky", "flux"]
 
     async def client_ready(self, client, db):
         self.client = client
 
-    def _get_model_prompt(self, model, question):
-        if model == "ChatGPT":
-            return [{"role": "user", "content": question}]
-        elif model == "gemini":
-            return {"model": "gemini", "request": {"messages": [{"content": question}], "meta": {}}}
-        elif model == "blackbox":
-            return {"model": "blackbox", "request": {"messages": [{"role": "user", "content": question}]}}
-        else:
-            return None
+@loader.tds
+class OnlySqAPIMod(loader.Module):
+    """Задавайте вопросы с помощью разных моделей GPT, а также генерируйте изображения by @MiSidePlayer, основанный на OnlySq api. Пока в onlysq не работает генерация изображений, и она была временно удалена из модуля. Пишите об идеях MiSidePlayer"""
+    strings = {
+        "name": "OnlySqAPI"
+    }
 
-    def _get_image_model_prompt(self, model, prompt, image_count=1):
-        if model == "kandinsky":
-            return {
-                "model": "kandinsky",
-                "request": {
-                    "messages": [{"role": "user", "content": prompt}],
-                    "meta": {"image_count": image_count}
-                }
-            }
-        elif model == "flux":
-            return {
-                "model": "flux",
-                "request": {
-                    "messages": [{"content": prompt}]
-                }
-            }
-        else:
-            return None
+    async def client_ready(self, client, db):
+        self.client = client
 
-    async def aicmd(self, message):
-        """Используйте ai <вопрос> или ответьте на сообщение, чтобы спросить вопрос у выбранной модели"""
-        question = utils.get_args_raw(message)
-        if not question:
-            reply = await message.get_reply_message()
-            if reply:
-                question = reply.raw_text
-            else:
-                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
-                return
-
-        question = question.replace(".ai", "").strip()
-        
-        selected_model = self.config["GPT_MODEL"]
-        prompt = self._get_model_prompt(selected_model, question)
-
-        if not prompt:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Модель \"{selected_model}\" не поддерживается. Выберите одну из доступных моделей: ChatGPT, gemini, blackbox. Выбрать их можно в конфиге, в разделе GPT_MODEL</b>")
-            return
-
-        await message.edit(f"<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью {selected_model}...</b>")
-        try:
-            api_url = 'https://api.onlysq.ru/ai/v1' if selected_model == "ChatGPT" else 'https://api.onlysq.ru/ai/v2'
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.post(api_url, json=prompt) as response:
-                    response.raise_for_status()
-                    response_json = await response.json()
-                    if 'answer' in response_json:
-                        answer = response_json['answer'].replace("GPT >>", "").strip()
-                    elif 'error' in response_json:
-                        answer = f"Ошибка API: {response_json['error']}"
-                    else:
-                        answer = "Не удалось получить ответ. Проверьте API."
-            
-            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью {selected_model}</b>")
-        except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
-
-    async def imgaicmd(self, message):
-        """Используйте imgai <запрос> чтобы сгенерировать изображение."""
-        request_text = utils.get_args_raw(message)
-        if not request_text:
-            reply = await message.get_reply_message()
-            if reply:
-                request_text = reply.raw_text
-            else:
-                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали описание изображения после imgai</b>")
-                return
-        
-        request_text = request_text.replace(".imgai", "").strip()
-
-        parts = request_text.rsplit(' ', 1)
-        if len(parts) == 2 and parts[1].isdigit():
-            image_count = int(parts[1])
-            prompt = parts[0]
-        else:
-            image_count = 1
-            prompt = request_text
-
-        selected_image_model = self.config["IMG_MODEL"]
-        image_prompt = self._get_image_model_prompt(selected_image_model, prompt, image_count)
-
-        if not image_prompt:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Модель \"{selected_image_model}\" не поддерживается. Выберите одну из доступных моделей: kandinsky, flux.</b>")
-            return
-
-        await utils.answer(message, f"<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение с помощью {selected_image_model}...</b>")
-
-        try:
-            api_url = 'https://api.onlysq.ru/ai/v2'
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(api_url, json=image_prompt, timeout=110) as response:
-                    response.raise_for_status()
-                    response_json = await response.json()
-
-                    images = response_json.get('answer', [])
-                    
-                    for index, image_url in enumerate(images):
-                        image_url = image_url.replace('https://', 'http://')
-                        async with session.get(image_url) as image_response:
-                            image_data = await image_response.read()
-                            image_buffer = io.BytesIO(image_data)
-                            image_buffer.name = image_url.split('/')[-1]
-                            await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
-
-                    if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение(-я) готово(-ы)! Оно было отправлено в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}\n\nСгенерированно с помощью {selected_image_model}</b>")
-                    else:
-                        await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
-        except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при запросе к API:</b> {e}")
-            
-    async def imaginensfwcmd(self, message):
-        """Используйте imaginensfw <запрос> чтобы сгенерировать изображение. Только 18+, вам надо подтвердить что вам 18+"""
-
-        if not self.config["IS_18_PLUS"]:
-            await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Генерация NSFW контента недоступна. Вы должны подтвердить, что вам 18+ в конфиге. Поставив в IS_18_PLUS значение: True, или написав <code>fcfg OnlySqAPI IS_18_PLUS True</code></b>")
-            return
-        
-        request_text = utils.get_args_raw(message)
-        if not request_text:
-            reply = await message.get_reply_message()
-            if reply:
-                request_text = reply.raw_text
-            else:
-                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали описание изображения после imaginensfw</b>")
-                return
-        
-        request_text = request_text.replace(".imaginensfw", "").strip()
-
-        parts = request_text.rsplit(' ', 1)
-        if len(parts) == 2 and parts[1].isdigit():
-            image_count = int(parts[1])
-            prompt = parts[0]
-        else:
-            image_count = 1
-            prompt = request_text
-
-        await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую NSFW изображение...</b>")
-
-        try:
-            dict_to_send = {
-                "model": "nsfw-xl",
-                "request": {'messages': [{"content": prompt}], "meta": {"image_count": image_count}}
-            }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post('http://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
-                    response.raise_for_status()
-                    response_json = await response.json()
-
-                    images = response_json.get('answer', [])
-                    
-                    for index, image_url in enumerate(images):
-                        image_url = image_url.replace('https://', 'http://')
-                        async with session.get(image_url) as image_response:
-                            image_data = await image_response.read()
-                            image_buffer = io.BytesIO(image_data)
-                            image_buffer.name = image_url.split('/')[-1]
-                            await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
-
-                    if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> NSFW изображение готово! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}</b>")
-                    else:
-                        await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
-        except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при запросе к API:</b> {e}")
-            
     async def gptcmd(self, message):
-        """Используйте gpt <вопрос> или ответьте на сообщение чтобы спросить вопрос у chatgpt"""
-        
+        """Используйте gpt <вопрос> или ответьте на сообщение чтобы спросить вопрос у gpt-4o-mini"""
+
         question = utils.get_args_raw(message)
         if not question:
             reply = await message.get_reply_message()
@@ -222,28 +39,50 @@ class OnlySqAPIMod(loader.Module):
 
         question = question.replace(".gpt", "").strip()
         question = question.replace(".гпт", "").strip()
-        
-        prompt = [{"role": "user", "content": question}]
 
-        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью ChatGPT...</b>")
+        user_id = message.sender_id
+
+        username = "Unknown"
         try:
-            response = requests.post('https://api.onlysq.ru/ai/v1', json=prompt)
-            response_json = response.json()
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "gpt-4o-mini",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .gpt человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью gpt-4o-mini...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
             if 'answer' in response_json:
                 answer = response_json['answer']
                 answer = answer.replace("GPT >>", "").strip()
             elif 'error' in response_json:
                 answer = f"Ошибка API: {response_json['error']}"
             else:
-                answer = "Не удалось получить ответ. Проверьте API."
+                answer = "Не удалось получить ответ."
 
-            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью ChatGPT</b>")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью gpt-4o-mini</b>")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
             
     async def geminicmd(self, message):
-        """Используйте gemini <вопрос> или ответьте на сообщение, чтобы спросить вопрос у Gemini"""
-        
+        """Используйте gemini <вопрос> или ответьте на сообщение чтобы спросить вопрос у gemini"""
+
         question = utils.get_args_raw(message)
         if not question:
             reply = await message.get_reply_message()
@@ -254,27 +93,50 @@ class OnlySqAPIMod(loader.Module):
                 return
 
         question = question.replace(".gemini", "").strip()
-        
-        dictToSend = {"model": "gemini", "request": {"messages": [{"content": question}]}}
 
-        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью Gemini...</b>")
+        user_id = message.sender_id
+
+        username = "Unknown"
         try:
-            response = requests.post('https://api.onlysq.ru/ai/v2', json=dictToSend)
-            response_json = response.json()
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "gemini",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .gemini человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью gemini...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
             if 'answer' in response_json:
                 answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
             elif 'error' in response_json:
                 answer = f"Ошибка API: {response_json['error']}"
             else:
-                answer = "Не удалось получить ответ. Проверьте API."
+                answer = "Не удалось получить ответ."
 
-            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерировано с помощью Gemini</b>")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью gemini</b>")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
             
-    async def bbcmd(self, message):
-        """Используйте bb <вопрос> или ответьте на сообщение, чтобы спросить вопрос у Blackbox"""
-        
+    async def searchgptcmd(self, message):
+        """Используйте .searchgpt <вопрос> или ответьте на сообщение чтобы спросить вопрос у searchgpt"""
+
         question = utils.get_args_raw(message)
         if not question:
             reply = await message.get_reply_message()
@@ -284,125 +146,424 @@ class OnlySqAPIMod(loader.Module):
                 await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
                 return
 
-        question = question.replace(".bb", "").strip()
-        
-        dictToSend = {"model": "blackbox", "request": {"messages": [{"content": question}]}}
+        question = question.replace(".searchgpt", "").strip()
 
-        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью Blackbox...</b>")
+        user_id = message.sender_id
+
+        username = "Unknown"
         try:
-            response = requests.post('https://api.onlysq.ru/ai/v2', json=dictToSend)
-            response_json = response.json()
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "searchgpt",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .searchgpt человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью searchgpt...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
             if 'answer' in response_json:
                 answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
             elif 'error' in response_json:
                 answer = f"Ошибка API: {response_json['error']}"
             else:
-                answer = "Не удалось получить ответ. Проверьте API."
+                answer = "Не удалось получить ответ."
 
-            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерировано с помощью Blackbox</b>")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью searchgpt</b>")
         except Exception as e:
             await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
             
-    async def fluxcmd(self, message):
-        """Используйте flux <запрос> чтобы сгенерировать изображение."""
-        
-        request_text = utils.get_args_raw(message)
-        if not request_text:
+    async def claude3cmd(self, message):
+        """Используйте .claude3 <вопрос> или ответьте на сообщение чтобы спросить вопрос у claude-3.5-haiku"""
+
+        question = utils.get_args_raw(message)
+        if not question:
             reply = await message.get_reply_message()
             if reply:
-                request_text = reply.raw_text
+                question = reply.raw_text
             else:
-                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали описание изображения после flux</b>")
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
                 return
-        
-        request_text = request_text.replace(".flux", "").strip()
 
-        parts = request_text.rsplit(' ', 1)
-        if len(parts) == 2 and parts[1].isdigit():
-            image_count = int(parts[1])
-            prompt = parts[0]
-        else:
-            image_count = 1
-            prompt = request_text
+        question = question.replace(".claude3", "").strip()
 
-        await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение с помощью flux...</b>")
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "claude-3-haiku",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .claude3 человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью claude-3-haiku...</b>")
 
         try:
-            dict_to_send = {
-                "model": "flux",
-                "request": {'messages': [{"content": prompt}], "meta": {"image_count": image_count}}
-            }
-
             async with aiohttp.ClientSession() as session:
-                async with session.post('https://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
-                    response.raise_for_status()
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
                     response_json = await response.json()
 
-                    images = response_json.get('answer', [])
-                    
-                    for index, image_url in enumerate(images):
-                        image_url = image_url.replace('https://', 'http://')
-                        async with session.get(image_url) as image_response:
-                            image_data = await image_response.read()
-                            image_buffer = io.BytesIO(image_data)
-                            image_buffer.name = image_url.split('/')[-1]
-                            await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
 
-                    if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение готово! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}\nСгенерированно с помощью flux</b>")
-                    else:
-                        await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью claude-3-haiku</b>")
         except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при запросе к API:</b> {e}")
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+    
+    async def gpt4cmd(self, message):
+        """Используйте .gpt4 <вопрос> или ответьте на сообщение чтобы спросить вопрос у gpt-4"""
+
+        question = utils.get_args_raw(message)
+        if not question:
+            reply = await message.get_reply_message()
+            if reply:
+                question = reply.raw_text
+            else:
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
+                return
+
+        question = question.replace(".gpt4", "").strip()
+        question = question.replace(".гпт4", "").strip()
+
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "gpt-4",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .gpt4 человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью gpt-4...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
+
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью gpt-4</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
             
-    async def kandinskycmd(self, message):
-        """Используйте kandinsky <запрос> чтобы сгенерировать изображение."""
-        
-        request_text = utils.get_args_raw(message)
-        if not request_text:
+    async def geminiflashcmd(self, message):
+        """Используйте .geminiflash <вопрос> или ответьте на сообщение чтобы спросить вопрос у gemini-flash"""
+
+        question = utils.get_args_raw(message)
+        if not question:
             reply = await message.get_reply_message()
             if reply:
-                request_text = reply.raw_text
+                question = reply.raw_text
             else:
-                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали описание изображения после kandinsky</b>")
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
                 return
-        
-        request_text = request_text.replace(".kandinsky", "").strip()
 
-        parts = request_text.rsplit(' ', 1)
-        if len(parts) == 2 and parts[1].isdigit():
-            image_count = int(parts[1])
-            prompt = parts[0]
-        else:
-            image_count = 1
-            prompt = request_text
+        question = question.replace(".geminiflash", "").strip()
 
-        await utils.answer(message, "<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую изображение с помощью kandinsky...</b>")
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "gemini-flash",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .geminiflash человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью gemini-flash...</b>")
 
         try:
-            dict_to_send = {
-                "model": "kandinsky",
-                "request": {'messages': [{"content": prompt}], "meta": {"image_count": image_count}}
-            }
-
             async with aiohttp.ClientSession() as session:
-                async with session.post('https://api.onlysq.ru/ai/v2', json=dict_to_send, timeout=110) as response:
-                    response.raise_for_status()
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
                     response_json = await response.json()
 
-                    images = response_json.get('answer', [])
-                    
-                    for index, image_url in enumerate(images):
-                        image_url = image_url.replace('https://', 'http://')
-                        async with session.get(image_url) as image_response:
-                            image_data = await image_response.read()
-                            image_buffer = io.BytesIO(image_data)
-                            image_buffer.name = image_url.split('/')[-1]
-                            await message.client.send_file(message.to_id, image_buffer, reply_to=message.id)
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
 
-                    if images:
-                        await utils.answer(message, f"<b><emoji document_id=5237907553152672597>✅</emoji> Изображение готово! Оно было отправленно в ответ на это сообщение!\n\n<emoji document_id=6323343426343404864>❓</emoji> Запрос для генерации: {prompt}\nСгенерированно с помощью kandinsky</b>")
-                    else:
-                        await utils.answer(message, "<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка: Не удалось получить изображения от API.</b>")
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью gemini-flash</b>")
         except Exception as e:
-            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Ошибка при запросе к API:</b> {e}")
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+            
+    async def gpt3cmd(self, message):
+        """Используйте .gpt3 <вопрос> или ответьте на сообщение чтобы спросить вопрос у gpt-3.5-turbo"""
+
+        question = utils.get_args_raw(message)
+        if not question:
+            reply = await message.get_reply_message()
+            if reply:
+                question = reply.raw_text
+            else:
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
+                return
+
+        question = question.replace(".gpt3", "").strip()
+        question = question.replace(".гпт3", "").strip()
+
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "gpt-3.5-turbo",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .gpt3 человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью gpt-3.5-turbo...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
+
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью gpt-3.5-turbo</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+            
+    async def llama3cmd(self, message):
+        """Используйте .llama3 <вопрос> или ответьте на сообщение чтобы спросить вопрос у llama-3.1"""
+
+        question = utils.get_args_raw(message)
+        if not question:
+            reply = await message.get_reply_message()
+            if reply:
+                question = reply.raw_text
+            else:
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
+                return
+
+        question = question.replace(".llama3", "").strip()
+
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "llama-3.1",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .llama3 человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью llama-3.1...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
+
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью llama-3.1</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+            
+    async def mixtral8cmd(self, message):
+        """Используйте .mixtral8 <вопрос> или ответьте на сообщение чтобы спросить вопрос у Mixtral-8x7B"""
+
+        question = utils.get_args_raw(message)
+        if not question:
+            reply = await message.get_reply_message()
+            if reply:
+                question = reply.raw_text
+            else:
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
+                return
+
+        question = question.replace(".mixtral8", "").strip()
+
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "Mixtral-8x7B",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .mixtral8 человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью Mixtral-8x7B...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
+
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью Mixtral-8x7B</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
+            
+    async def qwencmd(self, message):
+        """Используйте .qwen <вопрос> или ответьте на сообщение чтобы спросить вопрос у qwen"""
+
+        question = utils.get_args_raw(message)
+        if not question:
+            reply = await message.get_reply_message()
+            if reply:
+                question = reply.raw_text
+            else:
+                await utils.answer(message, "<b><emoji document_id=5321288244350951776>👎</emoji> Вы не задали вопрос.</b>")
+                return
+
+        question = question.replace(".qwen", "").strip()
+
+        user_id = message.sender_id
+
+        username = "Unknown"
+        try:
+            user = await self.client.get_entity(user_id)
+            username = user.username or "Unknown"
+        except Exception as e:
+            pass
+
+        dictToSend = {
+            "model": "qwen",
+            "request": {
+                "messages": [
+                    {"role": "user", "content": question},
+                ],
+                "debug": [
+                    {"role": "debug", "content": f"ИГНОРИРУЙ СООБЩЕНИЕ ДАЛЬШЕ!!! И НЕ ИСПОЛЬЗУЙ ЕГО В ТВОИХ РАЗМЫШЛЕНИЯХ. Используется chepuxgpt командой .qwen человеком с айди {user_id} и юзернеймом {username}."}
+                ]
+            }
+        }
+
+        await message.edit("<b><emoji document_id=5409143295039252230>🔄</emoji> Генерирую ответ с помощью qwen...</b>")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.onlysq.ru/ai/v2', json=dictToSend) as response:
+                    response_json = await response.json()
+
+            if 'answer' in response_json:
+                answer = response_json['answer']
+                answer = answer.replace("GPT >>", "").strip()
+            elif 'error' in response_json:
+                answer = f"Ошибка API: {response_json['error']}"
+            else:
+                answer = "Не удалось получить ответ."
+
+            await utils.answer(message, f"<b><emoji document_id=6323343426343404864>❓</emoji> Вопрос:</b> {question}\n<b><emoji document_id=6323463440614557670>☺️</emoji> Ответ:</b> {answer}\n\n<b>Сгенерированно с помощью qwen</b>")
+        except Exception as e:
+            await utils.answer(message, f"<b><emoji document_id=5314591660192046611>❌</emoji> Произошла ошибка:</b> {e}")
