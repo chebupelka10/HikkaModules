@@ -484,7 +484,7 @@ class OnlySqAPIMod(loader.Module):
             pass
 
         dictToSend = {
-            "model": "Mixtral-8x7B",
+            "model": "mixtral-8x7B",
             "request": {
                 "messages": [
                     {"role": "user", "content": question},
