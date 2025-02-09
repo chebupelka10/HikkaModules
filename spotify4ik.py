@@ -400,7 +400,7 @@ class Spotify4ikMod(loader.Module):
             await utils.answer(message, self.strings("404"))
             return
 
-        message = await utils.answer(message, self.strings("searching"))
+        progress_message = await utils.answer(message, self.strings("searching"))
 
         try:
             track = self.sp.track(args)
@@ -429,7 +429,6 @@ class Spotify4ikMod(loader.Module):
                     "outtmpl": audio_path,
                     "noplaylist": True,
                 }
-
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     ydl.download([f"ytsearch1:{track_name} - {artist_name}"])
 
@@ -447,13 +446,11 @@ class Spotify4ikMod(loader.Module):
                     f"<emoji document_id=5870570722778156940>💿</emoji> <b>Альбом:</b> <code>{album_name}</code>\n"
                     f"<emoji document_id=5872756762347573066>🕒</emoji> <b>Длина трека: {track_duration // 60}:{track_duration % 60:02d}</b>"
                 )
-
                 if track_url:
                     caption += (
                         f"\n\n<emoji document_id=5294137402430858861>🎵</emoji> "
                         f"<b><a href=\"{track_url}\">Открыть на Spotify</a></b>"
                     )
-
                 if universal_link:
                     caption += (
                         f"\n<emoji document_id=5902449142575141204>🔗</emoji> "
@@ -474,61 +471,122 @@ class Spotify4ikMod(loader.Module):
                     thumb=art_path,
                     reply_to=message.reply_to_msg_id if message.is_reply else getattr(message, "top_id", None),
                 )
+                await progress_message.delete()
+                return
+            except Exception:
+                pass
 
-            except Exception as e:
-                logger.error(f"Ошибка загрузки или отправки аудио: {e}")
-                try:
-                    name = track.get("name")
-                    artists = [
-                        artist["name"] for artist in track.get("artists", []) if "name" in artist
-                    ]
-                    full_song_name = f"{name} - {', '.join(artists)}"
+            try:
+                search_query = f"ytsearch10:{track_name} - {artist_name}"
+                ydl_opts_search = {
+                    "format": "bestaudio/best",
+                    "noplaylist": True,
+                    "quiet": True,
+                }
+                with yt_dlp.YoutubeDL(ydl_opts_search) as ydl:
+                    info = ydl.extract_info(search_query, download=False)
+                entries = info.get("entries", [])
+                success = False
+                for entry in entries:
+                    try:
+                        video_url = entry.get("webpage_url")
+                        if not video_url:
+                            continue
+                        audio_path = os.path.join(temp_dir, f"{artist_name} - {track_name}-{entry.get('id')}.mp3")
+                        ydl_opts_download = {
+                            "format": "bestaudio/best",
+                            "outtmpl": audio_path,
+                            "noplaylist": True,
+                        }
+                        with yt_dlp.YoutubeDL(ydl_opts_download) as ydl:
+                            ydl.download([video_url])
+                        success = True
+                        break
+                    except Exception:
+                        continue
+                if not success:
+                    raise Exception("Не удалось скачать трек со второго способа")
 
-                    music = await self.musicdl.dl(full_song_name, only_document=True)
+                album_art_url = track["album"]["images"][0]["url"]
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(album_art_url) as response:
+                        art_path = os.path.join(temp_dir, "cover.jpg")
+                        if response.status == 200:
+                            with open(art_path, "wb") as f:
+                                f.write(await response.read())
 
-                    track_name = track["name"]
-                    artist_name = ", ".join(artists)
-                    album_name = track["album"]["name"]
-                    track_duration = track["duration_ms"] // 1000
-                    track_url = track["external_urls"]["spotify"]
-                    universal_link = f"https://song.link/s/{track['id']}" if track.get("id") else None
-
-                    caption = (
-                        f"<emoji document_id=5870794890006237381>🎶</emoji> "
-                        f"<code>{track_name}</code> - <code>{artist_name}</code>\n"
-                        f"<emoji document_id=5870570722778156940>💿</emoji> <b>Альбом:</b> <code>{album_name}</code>\n"
-                        f"<emoji document_id=5872756762347573066>🕒</emoji> <b>Длина трека: {track_duration // 60}:{track_duration % 60:02d}</b>"
+                caption = (
+                    f"<emoji document_id=5870794890006237381>🎶</emoji> "
+                    f"<code>{track_name}</code> - <code>{artist_name}</code>\n"
+                    f"<emoji document_id=5870570722778156940>💿</emoji> <b>Альбом:</b> <code>{album_name}</code>\n"
+                    f"<emoji document_id=5872756762347573066>🕒</emoji> <b>Длина трека: {track_duration // 60}:{track_duration % 60:02d}</b>"
+                )
+                if track_url:
+                    caption += (
+                        f"\n\n<emoji document_id=5294137402430858861>🎵</emoji> "
+                        f"<b><a href=\"{track_url}\">Открыть на Spotify</a></b>"
+                    )
+                if universal_link:
+                    caption += (
+                        f"\n<emoji document_id=5902449142575141204>🔗</emoji> "
+                        f"<b><a href=\"{universal_link}\">Открыть на song.link</a></b>"
                     )
 
-                    if track_url:
-                        caption += (
-                            f"\n\n<emoji document_id=5294137402430858861>🎵</emoji> "
-                            f"<b><a href=\"{track_url}\">Открыть на Spotify</a></b>"
+                await self._client.send_file(
+                    message.chat_id,
+                    audio_path,
+                    caption=caption,
+                    attributes=[
+                        types.DocumentAttributeAudio(
+                            duration=track_duration,
+                            title=track_name,
+                            performer=artist_name
                         )
+                    ],
+                    thumb=art_path,
+                    reply_to=message.reply_to_msg_id if message.is_reply else getattr(message, "top_id", None),
+                )
+                await progress_message.delete()
+                return
+            except Exception:
+                pass
 
-                    if universal_link:
-                        caption += (
-                            f"\n<emoji document_id=5902449142575141204>🔗</emoji> "
-                            f"<b><a href=\"{universal_link}\">Открыть на song.link</a></b>"
-                        )
+            try:
+                name = track.get("name")
+                artists = [artist["name"] for artist in track.get("artists", []) if "name" in artist]
+                full_song_name = f"{name} - {', '.join(artists)}"
+                music = await self.musicdl.dl(full_song_name, only_document=True)
 
-                    await self._client.send_file(
-                        message.peer_id,
-                        music,
-                        caption=caption,
+                caption = (
+                    f"<emoji document_id=5870794890006237381>🎶</emoji> "
+                    f"<code>{track_name}</code> - <code>{artist_name}</code>\n"
+                    f"<emoji document_id=5870570722778156940>💿</emoji> <b>Альбом:</b> <code>{album_name}</code>\n"
+                    f"<emoji document_id=5872756762347573066>🕒</emoji> <b>Длина трека: {track_duration // 60}:{track_duration % 60:02d}</b>"
+                )
+                if track_url:
+                    caption += (
+                        f"\n\n<emoji document_id=5294137402430858861>🎵</emoji> "
+                        f"<b><a href=\"{track_url}\">Открыть на Spotify</a></b>"
+                    )
+                if universal_link:
+                    caption += (
+                        f"\n<emoji document_id=5902449142575141204>🔗</emoji> "
+                        f"<b><a href=\"{universal_link}\">Открыть на song.link</a></b>"
                     )
 
-                    if message.out:
-                        await message.delete()
-
-                except Exception as fallback_error:
-                    await utils.answer(
-                        message,
-                        f"Обе попытки отправки трека завершились ошибкой: {str(fallback_error)}"
-                    )
+                await self._client.send_file(
+                    message.peer_id,
+                    music,
+                    caption=caption,
+                )
+                await progress_message.delete()
+            except Exception:
+                await utils.answer(
+                    message,
+                    "<emoji document_id=5274099962655816924>❗️</emoji> <b>Скачать трек не удалось!</b>"
+                )
             finally:
-                await message.delete()
-
+                await progress_message.delete()
 
     async def _open_track(
         self,
@@ -661,7 +719,10 @@ class Spotify4ikMod(loader.Module):
     @tokenized
     async def snowcmd(self, message: Message):
         """🎧 Просмотреть карточку текущего трека."""
-        await utils.answer(message, "<emoji document_id=5294137402430858861>🎵</emoji> <b>Погружаюсь в Spotify, чтобы найти, что играет прямо сейчас...</b>")
+        progress_message = await utils.answer(
+            message,
+            "<emoji document_id=5294137402430858861>🎵</emoji> <b>Погружаюсь в Spotify, чтобы найти, что играет прямо сейчас...</b>"
+        )
         current_playback = self.sp.current_playback()
         try:
             device = (
@@ -675,9 +736,7 @@ class Spotify4ikMod(loader.Module):
         try:
             playlist_id = current_playback["context"]["uri"].split(":")[-1]
             playlist = self.sp.playlist(playlist_id)
-
             playlist_name = playlist.get("name", None)
-
             try:
                 playlist_owner = (
                     f'<a href="https://open.spotify.com/user/{playlist["owner"]["id"]}">{playlist["owner"]["display_name"]}</a>'
@@ -702,7 +761,6 @@ class Spotify4ikMod(loader.Module):
             .get("spotify", None)
         )
         universal_link = f"https://song.link/s/{track_id}"
-
 
         artists = [
             artist["name"]
@@ -767,28 +825,24 @@ class Spotify4ikMod(loader.Module):
             )
             if universal_link:
                 result += (
-                    f"\n<emoji document_id=5877465816030515018>🔗</emoji> <b><a href='{universal_link}'>Открыть на song.link</a></b>"
+                    f'\n<emoji document_id=5877465816030515018>🔗</emoji> <b><a href="{universal_link}">Открыть на song.link</a></b>'
                 )
-
         except Exception:
             result = self.strings("no_music")
 
-        message = await utils.answer(
+        progress_message = await utils.answer(
             message,
-            result.format(is_flac="")
-            + "\n\n<emoji document_id=5451646226975955576>⌛️</emoji> <i>Скачиваю трек,"
-            " почти готово!</i>",
+            result.format(is_flac="") + "\n\n<emoji document_id=5451646226975955576>⌛️</emoji> <i>Скачиваю трек, почти готово!</i>",
         )
 
-        try:
-            with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
                 audio_path = os.path.join(temp_dir, f"{artists[0]} - {track}.mp3")
                 ydl_opts = {
                     "format": "bestaudio/best",
                     "outtmpl": audio_path,
                     "noplaylist": True,
                 }
-
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     ydl.download([f"ytsearch1:{track} - {artists[0]}"])
 
@@ -796,8 +850,9 @@ class Spotify4ikMod(loader.Module):
                 async with aiohttp.ClientSession() as session:
                     async with session.get(album_art_url) as response:
                         art_path = os.path.join(temp_dir, "cover.jpg")
-                        with open(art_path, "wb") as f:
-                            f.write(await response.read())
+                        if response.status == 200:
+                            with open(art_path, "wb") as f:
+                                f.write(await response.read())
 
                 await self._client.send_file(
                     message.chat_id,
@@ -813,17 +868,73 @@ class Spotify4ikMod(loader.Module):
                     thumb=art_path,
                     reply_to=message.reply_to_msg_id if message.is_reply else getattr(message, "top_id", None)
                 )
+                await progress_message.delete()
+                return
+            except Exception:
+                pass
+            try:
+                search_query = f"ytsearch10:{track} - {artists[0]}"
+                ydl_opts_search = {
+                    "format": "bestaudio/best",
+                    "noplaylist": True,
+                    "quiet": True,
+                }
+                with yt_dlp.YoutubeDL(ydl_opts_search) as ydl:
+                    info = ydl.extract_info(search_query, download=False)
+                entries = info.get("entries", [])
+                success = False
+                for entry in entries:
+                    try:
+                        video_url = entry.get("webpage_url")
+                        if not video_url:
+                            continue
+                        audio_path = os.path.join(temp_dir, f"{artists[0]} - {track}-{entry.get('id')}.mp3")
+                        ydl_opts_download = {
+                            "format": "bestaudio/best",
+                            "outtmpl": audio_path,
+                            "noplaylist": True,
+                        }
+                        with yt_dlp.YoutubeDL(ydl_opts_download) as ydl:
+                            ydl.download([video_url])
+                        success = True
+                        break
+                    except Exception:
+                        continue
+                if not success:
+                    raise Exception("Не удалось скачать трек со второго способа")
+                album_art_url = current_playback["item"]["album"]["images"][0]["url"]
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(album_art_url) as response:
+                        art_path = os.path.join(temp_dir, "cover.jpg")
+                        if response.status == 200:
+                            with open(art_path, "wb") as f:
+                                f.write(await response.read())
 
-            await message.delete()
-
-        except Exception as e:
+                await self._client.send_file(
+                    message.chat_id,
+                    audio_path,
+                    caption=result,
+                    attributes=[
+                        types.DocumentAttributeAudio(
+                            duration=current_playback["item"]["duration_ms"] // 1000,
+                            title=track,
+                            performer=artists[0]
+                        )
+                    ],
+                    thumb=art_path,
+                    reply_to=message.reply_to_msg_id if message.is_reply else getattr(message, "top_id", None)
+                )
+                await progress_message.delete()
+                return
+            except Exception:
+                pass
             try:
                 await self._open_track(current_playback["item"], message, result)
-                await message.delete()
-
-            except Exception as fallback_error:
-                    await utils.answer(message, f"Both download methods failed: {str(fallback_error)}")
-
+                await progress_message.delete()
+            except Exception:
+                await utils.answer(message, result + "\n\n<emoji document_id=5274099962655816924>❗️</emoji> <b>Скачать трек не удалось!</b>")
+            finally:
+                await progress_message.delete()
 
     async def watcher(self, message: Message):
         """Watcher is used to update token"""
